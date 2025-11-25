@@ -5,54 +5,47 @@
 1. Go to your Netlify site dashboard
 2. Navigate to **Site Settings → Environment**
 3. Click **Add a variable**
-4. Add these environment variables:
+4. Add this **1 required variable**:
 
-### Required for Admin Password
+| Key | Value |
+|-----|-------|
+| `ADMIN_PASSWORD` | Your secure password (e.g., `MySecurePass123!`) |
 
-```
-ADMIN_PASSWORD = your_secure_password_here
-SESSION_SECRET = generate_a_random_secret_key
-```
-
-**How to generate SESSION_SECRET:**
-- Go to your terminal
-- Run: `openssl rand -base64 32`
-- Copy the output and paste into Netlify
+That's it! No more SESSION_SECRET needed. 🎉
 
 ### Optional: Firebase Configuration
 
-If you want real-time data sync:
-
-```
-NEXT_PUBLIC_FIREBASE_API_KEY = your_key
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN = your_domain
-NEXT_PUBLIC_FIREBASE_PROJECT_ID = your_project_id
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET = your_bucket
-NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID = your_id
-NEXT_PUBLIC_FIREBASE_APP_ID = your_app_id
-```
+If you want real-time data sync on Netlify, also add these in **Environment**:
+- `NEXT_PUBLIC_FIREBASE_API_KEY`
+- `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN`
+- `NEXT_PUBLIC_FIREBASE_PROJECT_ID`
+- `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET`
+- `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID`
+- `NEXT_PUBLIC_FIREBASE_APP_ID`
 
 ## Step 2: Redeploy
 
-1. After adding variables, go to **Deployments**
-2. Click **Trigger deploy** → **Deploy site**
-3. Wait for the build to complete
+1. Go to **Deployments**
+2. Click **Trigger deploy → Deploy site**
+3. Wait for build to finish
 
-## Step 3: Test Admin Access
+## Step 3: Test
 
 1. Visit: `yoursite.netlify.app/admin/login`
 2. Enter your `ADMIN_PASSWORD`
-3. Should see "Success!" message
+3. Should now login successfully ✅
+
+---
 
 ## Troubleshooting
 
-### "Admin authentication not configured" error
+### "Admin password not configured" error
 
-This means `ADMIN_PASSWORD` or `SESSION_SECRET` is not set:
+This means `ADMIN_PASSWORD` is not set:
 
 1. Check **Site Settings → Environment**
-2. Make sure both variables exist
-3. Redeploy after adding them
+2. Add the `ADMIN_PASSWORD` variable
+3. Redeploy
 
 ### "Invalid password" error
 
@@ -66,11 +59,14 @@ Your password doesn't match:
 
 1. Clear browser cache and cookies
 2. Try in an incognito/private window
-3. Check browser console for error messages (F12)
+3. Check browser console for error messages (F12 → Console tab)
 
-## Important Notes
+---
 
-- **ADMIN_PASSWORD** should be changed from default `admin123`
-- **SESSION_SECRET** must be a random string (generated with `openssl rand -base64 32`)
-- Both variables are required for admin panel to work
-- After changing variables, always **Trigger deploy** for changes to take effect
+## How It Works
+
+- Admin login requires only **ADMIN_PASSWORD**
+- Session cookie expires after **7 days**
+- No external secrets or complex key generation needed
+- Simple, reliable, easy to deploy
+

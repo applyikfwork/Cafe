@@ -129,19 +129,18 @@ All dependencies installed via `package.json`. Key additions:
 - **Admin Link Hidden**: Removed admin link from public navigation bar
   - Admin panel only accessible via direct URL: `/admin`
   - Prevents casual users from discovering admin panel
-- **Secure Password Protection**: Implemented robust authentication system
-  - HMAC-SHA256 signed tokens using Web Crypto API (Edge Runtime compatible)
-  - Timing-safe signature verification to prevent attacks
+- **Simple Password Protection**: Implemented lightweight authentication system
+  - Only requires `ADMIN_PASSWORD` environment variable
+  - No SESSION_SECRET needed - uses timestamp-based expiration
   - Admin login page at `/admin/login` with password requirement
   - Logout functionality in admin sidebar (both desktop and mobile)
-  - Environment variables: `ADMIN_PASSWORD` (required) and `SESSION_SECRET` (auto-configured)
-  - 7-day session expiration with timestamp validation
+  - 7-day session expiration (automatically logs out after 7 days)
 - **Admin Authentication Files**:
   - `/admin/login` - Password-protected login page
   - `src/middleware.ts` - Route protection middleware
   - `src/app/api/admin/auth/route.ts` - Authentication API
-  - `src/lib/auth-utils.ts` - Centralized auth utilities
-- **Default Admin Password**: Currently set to `admin123` (CHANGE THIS IMMEDIATELY for production)
+  - `src/lib/auth-utils.ts` - Simple auth utilities
+- **Default Admin Password**: Currently set to `admin123` (CHANGE THIS in environment variables for production)
 
 ### Admin Panel Error Handling Fixes (November 25, 2025)
 - **Fixed Settings Page Loading**: Resolved infinite loading issue caused by duplicate 'id' property in useSettings hook

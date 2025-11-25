@@ -1,27 +1,17 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import { createAuthTokenEdge } from '@/lib/auth-utils';
+import { createAuthToken } from '@/lib/auth-utils';
 
 export async function POST(request: Request) {
   try {
     const { password } = await request.json();
     
     const adminPassword = process.env.ADMIN_PASSWORD;
-    const sessionSecret = process.env.SESSION_SECRET;
     
-    if (!adminPassword || !sessionSecret) {
-      console.error('Admin authentication misconfigured:', {
-        hasAdminPassword: !!adminPassword,
-        hasSessionSecret: !!sessionSecret,
-      });
-      
+    if (!adminPassword) {
       return NextResponse.json(
         {
-          error: 'Admin authentication not configured. Please set ADMIN_PASSWORD and SESSION_SECRET environment variables.',
-          debug: {
-            hasAdminPassword: !!adminPassword,
-            hasSessionSecret: !!sessionSecret,
-          }
+          error: 'Admin password not configured. Please set ADMIN_PASSWORD environment variable.',
         },
         { status: 500 }
       );
@@ -30,7 +20,7 @@ export async function POST(request: Request) {
     if (password === adminPassword) {
       try {
         const cookieStore = await cookies();
-        const authToken = await createAuthTokenEdge();
+        const authToken = createAuthToken();
         
         cookieStore.set('admin_auth', authToken, {
           httpOnly: true,
