@@ -121,6 +121,10 @@ const MOCK_MENU_ITEMS: MenuItem[] = [
 // Initialize mock data to Firestore
 export async function initializeMockData() {
   try {
+    if (!db) {
+      console.log('Database not initialized, skipping mock data initialization');
+      return;
+    }
     const menuCollection = collection(db, 'menu');
     const existingDocs = await getDocs(menuCollection);
     
@@ -143,49 +147,71 @@ export async function initializeMockData() {
 // Get all menu items
 export async function getMenuItems(): Promise<MenuItem[]> {
   try {
+    if (!db) {
+      console.log('Database not initialized, returning mock menu items');
+      return MOCK_MENU_ITEMS;
+    }
     const querySnapshot = await getDocs(collection(db, 'menu'));
-    return querySnapshot.docs.map((doc) => ({
+    const items = querySnapshot.docs.map((doc) => ({
       ...doc.data(),
       id: doc.id,
     } as MenuItem));
+    
+    // Return mock items if Firestore is empty
+    return items.length > 0 ? items : MOCK_MENU_ITEMS;
   } catch (error) {
     console.error('Error getting menu items:', error);
-    return [];
+    return MOCK_MENU_ITEMS;
   }
 }
 
 // Get menu items by category
 export async function getMenuItemsByCategory(category: string): Promise<MenuItem[]> {
   try {
+    if (!db) {
+      console.log('Database not initialized, returning mock menu items for category:', category);
+      return MOCK_MENU_ITEMS.filter((item) => item.category === category);
+    }
     const q = query(collection(db, 'menu'), where('category', '==', category));
     const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map((doc) => ({
+    const items = querySnapshot.docs.map((doc) => ({
       ...doc.data(),
       id: doc.id,
     } as MenuItem));
+    
+    // Return mock items if Firestore is empty
+    return items.length > 0 ? items : MOCK_MENU_ITEMS.filter((item) => item.category === category);
   } catch (error) {
     console.error('Error getting menu items by category:', error);
-    return [];
+    return MOCK_MENU_ITEMS.filter((item) => item.category === category);
   }
 }
 
 // Get single menu item
 export async function getMenuItem(id: string): Promise<MenuItem | null> {
   try {
+    if (!db) {
+      console.log('Database not initialized, looking for item in mock data');
+      return MOCK_MENU_ITEMS.find((item) => item.id === id) || null;
+    }
     const docSnap = await getDoc(doc(db, 'menu', id));
     if (docSnap.exists()) {
       return { ...docSnap.data(), id: docSnap.id } as MenuItem;
     }
-    return null;
+    // Fallback to mock data
+    return MOCK_MENU_ITEMS.find((item) => item.id === id) || null;
   } catch (error) {
     console.error('Error getting menu item:', error);
-    return null;
+    return MOCK_MENU_ITEMS.find((item) => item.id === id) || null;
   }
 }
 
 // Add menu item
 export async function addMenuItem(item: Omit<MenuItem, 'id'>): Promise<string> {
   try {
+    if (!db) {
+      throw new Error('Database not initialized. Please configure Firebase credentials in Replit Secrets.');
+    }
     const newId = `item-${Date.now()}`;
     await setDoc(doc(db, 'menu', newId), {
       ...item,
@@ -202,6 +228,9 @@ export async function addMenuItem(item: Omit<MenuItem, 'id'>): Promise<string> {
 // Update menu item
 export async function updateMenuItem(id: string, updates: Partial<MenuItem>): Promise<void> {
   try {
+    if (!db) {
+      throw new Error('Database not initialized. Please configure Firebase credentials in Replit Secrets.');
+    }
     await updateDoc(doc(db, 'menu', id), {
       ...updates,
       updatedAt: Timestamp.now(),
@@ -215,6 +244,9 @@ export async function updateMenuItem(id: string, updates: Partial<MenuItem>): Pr
 // Delete menu item
 export async function deleteMenuItem(id: string): Promise<void> {
   try {
+    if (!db) {
+      throw new Error('Database not initialized. Please configure Firebase credentials in Replit Secrets.');
+    }
     await deleteDoc(doc(db, 'menu', id));
   } catch (error) {
     console.error('Error deleting menu item:', error);
@@ -225,6 +257,11 @@ export async function deleteMenuItem(id: string): Promise<void> {
 // Subscribe to menu items (realtime)
 export function subscribeToMenuItems(callback: (items: MenuItem[]) => void): () => void {
   try {
+    if (!db) {
+      console.log('Database not initialized, using mock menu items');
+      callback(MOCK_MENU_ITEMS);
+      return () => {};
+    }
     const unsubscribe = onSnapshot(
       collection(db, 'menu'),
       (querySnapshot) => {
@@ -232,14 +269,13 @@ export function subscribeToMenuItems(callback: (items: MenuItem[]) => void): () 
           ...doc.data(),
           id: doc.id,
         } as MenuItem));
-        callback(items);
+        // Return items if any exist, otherwise use mock data
+        callback(items.length > 0 ? items : MOCK_MENU_ITEMS);
       },
       (error) => {
         console.error('Error subscribing to menu items:', error);
         // Fallback to mock data if permission denied
-        if (error.code === 'permission-denied') {
-          callback(MOCK_MENU_ITEMS);
-        }
+        callback(MOCK_MENU_ITEMS);
       }
     );
     return unsubscribe;
@@ -257,6 +293,12 @@ export function subscribeToMenuItemsByCategory(
   callback: (items: MenuItem[]) => void
 ): () => void {
   try {
+    if (!db) {
+      console.log('Database not initialized, using mock menu items for category:', category);
+      const filteredItems = MOCK_MENU_ITEMS.filter((item) => item.category === category);
+      callback(filteredItems);
+      return () => {};
+    }
     const q = query(collection(db, 'menu'), where('category', '==', category));
     const unsubscribe = onSnapshot(
       q,
@@ -265,15 +307,15 @@ export function subscribeToMenuItemsByCategory(
           ...doc.data(),
           id: doc.id,
         } as MenuItem));
-        callback(items);
+        // Return items if any exist, otherwise use filtered mock data
+        const filteredMock = MOCK_MENU_ITEMS.filter((item) => item.category === category);
+        callback(items.length > 0 ? items : filteredMock);
       },
       (error) => {
         console.error('Error subscribing to menu items by category:', error);
-        // Fallback to mock data if permission denied
-        if (error.code === 'permission-denied') {
-          const filteredItems = MOCK_MENU_ITEMS.filter((item) => item.category === category);
-          callback(filteredItems);
-        }
+        // Fallback to mock data
+        const filteredItems = MOCK_MENU_ITEMS.filter((item) => item.category === category);
+        callback(filteredItems);
       }
     );
     return unsubscribe;

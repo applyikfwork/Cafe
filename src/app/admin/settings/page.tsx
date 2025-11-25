@@ -93,9 +93,10 @@ export default function AdminSettingsPage() {
         description: 'Your cafe settings have been updated and are live across your website.',
       });
     } catch (error) {
+      console.error('Settings update error:', error);
       toast({
         title: 'Error',
-        description: 'Failed to update settings. Please try again.',
+        description: error instanceof Error ? error.message : 'Failed to update settings. Please try again.',
         variant: 'destructive',
       });
     } finally {
@@ -104,7 +105,14 @@ export default function AdminSettingsPage() {
   }
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading settings...</p>
+        </div>
+      </div>
+    );
   }
 
   return (

@@ -40,9 +40,10 @@ export default function PromotionsPage() {
       
       setIsDialogOpen(false);
     } catch (error) {
+      console.error('Promotion creation error:', error);
       toast({
         title: 'Error',
-        description: 'Failed to create promotion. Please try again.',
+        description: error instanceof Error ? error.message : 'Failed to create promotion. Please try again.',
         variant: 'destructive',
       });
     } finally {
@@ -69,9 +70,10 @@ export default function PromotionsPage() {
       setIsDialogOpen(false);
       setEditingPromotion(undefined);
     } catch (error) {
+      console.error('Promotion update error:', error);
       toast({
         title: 'Error',
-        description: 'Failed to update promotion. Please try again.',
+        description: error instanceof Error ? error.message : 'Failed to update promotion. Please try again.',
         variant: 'destructive',
       });
     } finally {
@@ -87,9 +89,10 @@ export default function PromotionsPage() {
         description: 'The promotion has been removed.',
       });
     } catch (error) {
+      console.error('Promotion deletion error:', error);
       toast({
         title: 'Error',
-        description: 'Failed to delete promotion. Please try again.',
+        description: error instanceof Error ? error.message : 'Failed to delete promotion. Please try again.',
         variant: 'destructive',
       });
     }

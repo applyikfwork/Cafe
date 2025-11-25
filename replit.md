@@ -122,7 +122,33 @@ All dependencies installed via `package.json`. Key additions:
 
 ## Recent Changes (2025-11-25)
 
-### Promotions System (Latest)
+### Admin Panel Error Handling Fixes (Latest - November 25, 2025)
+- **Fixed Settings Page Loading**: Resolved infinite loading issue caused by duplicate 'id' property in useSettings hook
+- **Firebase Null Safety**: Updated Firebase initialization to gracefully handle missing credentials with proper null checks
+- **Improved Error Messages**: All admin operations now display specific error messages instead of generic failures
+- **Graceful Fallbacks**: Admin pages load with default data when Firebase isn't configured, preventing app crashes
+- **Better Loading States**: Enhanced loading indicators for settings and promotions pages
+- **Database Validation**: Added comprehensive null checks throughout Firestore service layers
+- **User-Friendly Errors**: Error toasts now display the actual error message for easier debugging
+
+**Firebase Configuration Note**: 
+To use the admin panel's save functionality, you need to add your Firebase credentials to Replit Secrets:
+1. Go to Replit Secrets (Tools → Secrets)
+2. Add the following secrets with your Firebase project values:
+   - `NEXT_PUBLIC_FIREBASE_API_KEY`
+   - `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN`
+   - `NEXT_PUBLIC_FIREBASE_PROJECT_ID`
+   - `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET`
+   - `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID`
+   - `NEXT_PUBLIC_FIREBASE_APP_ID`
+3. **IMPORTANT**: After adding the secrets, you MUST restart the development server for the changes to take effect
+   - Click the "Stop" button in the Replit console
+   - Then click "Run" to restart the server
+   - Or use the workflow restart button
+
+**Note**: The admin panel will load with default/empty data when Firebase isn't configured, allowing you to preview the interface. However, all save, create, update, and delete operations will fail with a clear error message until Firebase is properly configured and the server is restarted.
+
+### Promotions System
 - **Promotions Admin Page**: Complete CRUD interface for managing promotions with date pickers, type selection, and item targeting
 - **Promotion Types**: Support for percentage discounts and fixed amount reductions
 - **Global & Item-Specific Promotions**: Can apply to all items or target specific menu items

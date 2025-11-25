@@ -17,7 +17,10 @@ import type { Promotion } from '@/types';
 
 export async function getPromotions(): Promise<Promotion[]> {
   try {
-    if (!db) return [];
+    if (!db) {
+      console.log('Database not initialized, returning empty promotions list');
+      return [];
+    }
     const promotionsCollection = collection(db, 'promotions');
     const promotionsQuery = query(promotionsCollection, orderBy('createdAt', 'desc'));
     const snapshot = await getDocs(promotionsQuery);
@@ -37,7 +40,10 @@ export async function getPromotions(): Promise<Promotion[]> {
 
 export async function getActivePromotions(): Promise<Promotion[]> {
   try {
-    if (!db) return [];
+    if (!db) {
+      console.log('Database not initialized, returning empty active promotions list');
+      return [];
+    }
     const promotionsCollection = collection(db, 'promotions');
     const now = Timestamp.now();
     const activeQuery = query(
@@ -62,7 +68,10 @@ export async function getActivePromotions(): Promise<Promotion[]> {
 
 export async function getPromotion(id: string): Promise<Promotion | null> {
   try {
-    if (!db) return null;
+    if (!db) {
+      console.log('Database not initialized');
+      return null;
+    }
     const promotionRef = doc(db, 'promotions', id);
     const promotionSnap = await getDoc(promotionRef);
     
@@ -86,7 +95,9 @@ export async function getPromotion(id: string): Promise<Promotion | null> {
 
 export async function createPromotion(promotion: Omit<Promotion, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
   try {
-    if (!db) throw new Error('Database not initialized');
+    if (!db) {
+      throw new Error('Database not initialized. Please configure Firebase credentials in Replit Secrets.');
+    }
     
     if (!promotion.title || !promotion.type || promotion.value === undefined) {
       throw new Error('Title, type, and value are required');
@@ -125,7 +136,9 @@ export async function createPromotion(promotion: Omit<Promotion, 'id' | 'created
 
 export async function updatePromotion(id: string, updates: Partial<Promotion>): Promise<void> {
   try {
-    if (!db) throw new Error('Database not initialized');
+    if (!db) {
+      throw new Error('Database not initialized. Please configure Firebase credentials in Replit Secrets.');
+    }
     
     const promotionRef = doc(db, 'promotions', id);
     const existingPromo = await getDoc(promotionRef);
@@ -183,7 +196,9 @@ export async function updatePromotion(id: string, updates: Partial<Promotion>): 
 
 export async function deletePromotion(id: string): Promise<void> {
   try {
-    if (!db) throw new Error('Database not initialized');
+    if (!db) {
+      throw new Error('Database not initialized. Please configure Firebase credentials in Replit Secrets.');
+    }
     const promotionRef = doc(db, 'promotions', id);
     await deleteDoc(promotionRef);
   } catch (error) {
@@ -195,6 +210,7 @@ export async function deletePromotion(id: string): Promise<void> {
 export function subscribeToPromotions(callback: (promotions: Promotion[]) => void): () => void {
   try {
     if (!db) {
+      console.log('Database not initialized, returning empty promotions list');
       callback([]);
       return () => {};
     }
@@ -231,7 +247,9 @@ export function subscribeToPromotions(callback: (promotions: Promotion[]) => voi
 
 export async function incrementPromotionUsage(id: string): Promise<void> {
   try {
-    if (!db) throw new Error('Database not initialized');
+    if (!db) {
+      throw new Error('Database not initialized. Please configure Firebase credentials in Replit Secrets.');
+    }
     const promotionRef = doc(db, 'promotions', id);
     const promotionSnap = await getDoc(promotionRef);
     

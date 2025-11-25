@@ -41,6 +41,10 @@ export const DEFAULT_SETTINGS: Omit<CafeSettings, 'updatedAt'> = {
 
 export async function initializeSettings() {
   try {
+    if (!db) {
+      console.error('Database not initialized');
+      return;
+    }
     const settingsRef = doc(db, 'settings', SETTINGS_DOC);
     const settingsSnap = await getDoc(settingsRef);
     
@@ -58,6 +62,10 @@ export async function initializeSettings() {
 
 export async function getSettings(): Promise<CafeSettings> {
   try {
+    if (!db) {
+      console.error('Database not initialized');
+      return DEFAULT_SETTINGS as CafeSettings;
+    }
     const settingsRef = doc(db, 'settings', SETTINGS_DOC);
     const settingsSnap = await getDoc(settingsRef);
     
@@ -73,6 +81,9 @@ export async function getSettings(): Promise<CafeSettings> {
 
 export async function updateSettings(updates: Partial<CafeSettings>): Promise<void> {
   try {
+    if (!db) {
+      throw new Error('Database not initialized. Please configure Firebase credentials.');
+    }
     const settingsRef = doc(db, 'settings', SETTINGS_DOC);
     await setDoc(settingsRef, {
       ...updates,
@@ -87,6 +98,11 @@ export async function updateSettings(updates: Partial<CafeSettings>): Promise<vo
 
 export function subscribeToSettings(callback: (settings: CafeSettings) => void): () => void {
   try {
+    if (!db) {
+      console.error('Database not initialized');
+      callback(DEFAULT_SETTINGS as CafeSettings);
+      return () => {};
+    }
     const settingsRef = doc(db, 'settings', SETTINGS_DOC);
     const unsubscribe = onSnapshot(
       settingsRef,
