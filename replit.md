@@ -121,6 +121,14 @@ All dependencies installed via `package.json`. Key additions:
 - All Radix UI components for accessible UI
 
 ## Recent Changes (2025-11-25)
+
+### Deployment Fixes
+- **Fixed Netlify Build Errors**: Moved TypeScript, TailwindCSS, and PostCSS from `devDependencies` to `dependencies` to ensure they're installed during production builds
+- **Fixed Firebase Build-Time Errors**: Updated Firebase initialization to only run on client-side (`typeof window !== 'undefined'`) to prevent build-time errors
+- **Deployment Configuration**: Set up Replit deployment config with autoscale deployment target
+- **Build Verification**: Local build now completes successfully with all 9 pages generated
+
+### Firebase Integration
 - **Firebase Integration**: Connected Firestore with real-time data subscription
 - **Mock Data System**: 10 demo menu items auto-initialize on first Firebase connect
 - **Real-time Hooks**: Created `useMenuItems` hook for subscribing to live menu data
@@ -134,6 +142,8 @@ All dependencies installed via `package.json`. Key additions:
 - **Mock Data Initialization**: Automatic demo data injection for new Firebase projects
 - **Custom Hooks**: Abstracted Firebase logic into reusable hooks for clean component code
 - **Client-side Rendering**: Pages use 'use client' for real-time Firebase subscriptions
+- **Build-Time Safety**: Firebase initialization is client-side only to prevent build failures
+- **Production Dependencies**: Build tools (TypeScript, TailwindCSS) in main dependencies for Netlify compatibility
 - **Warm Color Palette**: Primary #FF6B35 (coral), Secondary #F7F3EF (cream), Accents in coffee browns
 - **Animation-first Design**: Framer Motion for smooth, delightful micro-interactions throughout
 
