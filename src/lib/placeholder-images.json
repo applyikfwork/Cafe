@@ -1,3 +1,52 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "hero-cafe",
+      "description": "A stylish and cozy cafe interior with warm lighting.",
+      "imageUrl": "https://images.unsplash.com/photo-1579341560277-4dfaddaf6e98?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxjYWZlJTIwaW50ZXJpb3J8ZW58MHx8fHwxNzYzOTgwNzE1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "cafe interior"
+    },
+    {
+      "id": "coffee-art",
+      "description": "A cup of coffee with intricate latte art.",
+      "imageUrl": "https://images.unsplash.com/photo-1529892485617-25f63cd7b1e9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxsYXR0ZSUyMGFydHxlbnwwfHx8fDE3NjQwMDUxNTN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "latte art"
+    },
+    {
+      "id": "croissant",
+      "description": "A golden-brown, flaky croissant on a plate.",
+      "imageUrl": "https://images.unsplash.com/photo-1649542181703-33cc4f373b28?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8Y3JvaXNzYW50JTIwcGFzdHJ5fGVufDB8fHx8MTc2NDAzMzg5NXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "croissant pastry"
+    },
+    {
+      "id": "avocado-toast",
+      "description": "Avocado toast with a poached egg on top.",
+      "imageUrl": "https://images.unsplash.com/photo-1687276287139-88f7333c8ca4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxhdm9jYWRvJTIwdG9hc3R8ZW58MHx8fHwxNzYzOTgzMjMyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "avocado toast"
+    },
+    {
+      "id": "cheesecake",
+      "description": "A slice of cheesecake with a berry topping.",
+      "imageUrl": "https://images.unsplash.com/photo-1641424795123-9f12d697219d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxjaGVlc2VjYWtlJTIwZGVzc2VydHxlbnwwfHx8fDE3NjQwNzAwMTR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "cheesecake dessert"
+    },
+    {
+      "id": "salad-bowl",
+      "description": "A colorful and healthy salad bowl.",
+      "imageUrl": "https://images.unsplash.com/photo-1600335895229-6e75511892c8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxzYWxhZCUyMGJvd2x8ZW58MHx8fHwxNzYzOTc2NzAyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "salad bowl"
+    },
+    {
+      "id": "sandwich",
+      "description": "A hearty sandwich with fresh ingredients.",
+      "imageUrl": "https://images.unsplash.com/photo-1676300187347-6f60002fd83e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxnb3VybWV0JTIwc2FuZHdpY2h8ZW58MHx8fHwxNzY0MDcwMDE0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "gourmet sandwich"
+    },
+    {
+      "id": "iced-tea",
+      "description": "A tall glass of iced tea with lemon.",
+      "imageUrl": "https://images.unsplash.com/photo-1499638673689-79a0b5115d87?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxpY2VkJTIwdGVhfGVufDB8fHx8MTc2NDA2NTc5NXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "iced tea"
+    }
+  ]
 }
