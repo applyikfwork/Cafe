@@ -122,20 +122,47 @@ All dependencies installed via `package.json`. Key additions:
 
 ## Recent Changes (2025-11-25)
 
+### Promotions System (Latest)
+- **Promotions Admin Page**: Complete CRUD interface for managing promotions with date pickers, type selection, and item targeting
+- **Promotion Types**: Support for percentage discounts and fixed amount reductions
+- **Global & Item-Specific Promotions**: Can apply to all items or target specific menu items
+- **Date Range Validation**: Robust validation ensures end dates are after start dates, even for partial updates
+- **Timestamp Normalization**: Consistent Date handling throughout the application via `usePromotions` hook
+- **Firestore Service**: Complete CRUD with proper Timestamp-to-Date conversions and validation
+- **Active Promotion Filtering**: Only active promotions (within date range and enabled) display on frontend
+
+### Menu & Homepage Enhancements
+- **Enhanced Menu Page**: 
+  - Search functionality for menu items by name
+  - Tag-based filtering system
+  - Promotional badges on discounted items
+  - Price strike-through for items on sale
+  - Improved card designs with hover effects
+  - Better visual hierarchy and spacing
+- **Enhanced Homepage**:
+  - Active promotions banner showcasing current deals
+  - Improved visual appeal and engagement
+  - Better call-to-action buttons
+- **Real-time Updates**: All promotions sync in real-time across users
+
+### Settings System
+- **Settings Save Fix**: Changed from `updateDoc` to `setDoc` with merge option to prevent "document not found" errors
+- **Persistent Settings**: Cafe settings (name, hours, contact) now save reliably to Firestore
+
 ### Deployment Fixes
 - **Fixed Netlify Build Errors**: Moved TypeScript, TailwindCSS, and PostCSS from `devDependencies` to `dependencies` to ensure they're installed during production builds
 - **Fixed Firebase Build-Time Errors**: Updated Firebase initialization to only run on client-side (`typeof window !== 'undefined'`) to prevent build-time errors
 - **Deployment Configuration**: Set up Replit deployment config with autoscale deployment target
-- **Build Verification**: Local build now completes successfully with all 9 pages generated
+- **Build Verification**: Local build now completes successfully with all pages generated
 
 ### Firebase Integration
 - **Firebase Integration**: Connected Firestore with real-time data subscription
 - **Mock Data System**: 10 demo menu items auto-initialize on first Firebase connect
-- **Real-time Hooks**: Created `useMenuItems` hook for subscribing to live menu data
+- **Real-time Hooks**: Created `useMenuItems` and `usePromotions` hooks for subscribing to live data
 - **Updated Pages**: Home and menu pages now fetch from Firebase instead of static data
-- **Firestore Service**: Complete service layer with CRUD operations and real-time listeners
+- **Firestore Services**: Complete service layers with CRUD operations and real-time listeners
 - **Loading States**: Added loading indicators while Firebase data loads
-- **Client Components**: Converted home and menu pages to client components for Firebase integration
+- **Client Components**: Converted pages to client components for Firebase real-time integration
 
 ## Architecture Decisions
 - **Firestore Real-time**: Using Firestore listeners for instant data sync across all users
