@@ -30,6 +30,9 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  experimental: {
+    allowedOrigins: ['*'],
+  },
 };
 
 export default nextConfig;
