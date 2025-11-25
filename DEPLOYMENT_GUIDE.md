@@ -46,29 +46,36 @@ NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your-sender-id
 NEXT_PUBLIC_FIREBASE_APP_ID=your-app-id
 ```
 
-### Step 2: Deploy
+### Step 2: Verify Framework Detection (Important!)
 
-Your existing `netlify.toml` configuration is correct:
+1. In your Netlify site dashboard, go to **Site settings** → **Build & Deploy** → **Build settings**
+2. Make sure **Framework preset** is set to **Next.js** (not "Not set")
+3. If it's wrong, change it to "Next.js" and save
+
+### Step 3: Deploy
+
+Your `netlify.toml` configuration uses Netlify's official Next.js plugin:
 
 ```toml
 [build]
-command = "npm run build"
-publish = ".next"
+  command = "npm run build"
+  publish = ".next"
 
-[build.environment]
-NODE_ENV = "production"
-
-[[redirects]]
-from = "/*"
-to = "/.netlify/functions/___netlify-handler"
-status = 200
-force = true
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
 ```
 
+The `@netlify/plugin-nextjs` package is already installed and will handle:
+- Server-side rendering (SSR)
+- API routes
+- Image optimization
+- Automatic routing configuration
+
 Simply push your code to your connected Git repository, and Netlify will:
-1. Install all dependencies (including the build tools now in `dependencies`)
-2. Run `npm run build` successfully
-3. Deploy your Next.js application
+1. Detect Next.js framework automatically
+2. Install all dependencies (including the build tools now in `dependencies`)
+3. Run `npm run build` successfully
+4. Deploy your Next.js application with full SSR support
 
 ## Build Verification
 
@@ -105,18 +112,43 @@ The Replit deployment configuration has also been set up:
 
 ## Troubleshooting
 
-If you encounter any issues:
+### Getting 404 "Page Not Found" errors?
+
+This was likely caused by the old configuration. The new setup uses Netlify's official Next.js plugin which properly handles routing. After updating:
+
+1. **Clear Netlify's cache and redeploy:**
+   - Go to **Deploys** → **Trigger deploy** → **Clear cache and deploy site**
+
+2. **Verify the plugin is loaded:**
+   - Check your deploy logs for `@netlify/plugin-nextjs`
+   - You should see messages about Next.js runtime being used
+
+### Other Issues:
 
 1. **Build still failing?** 
    - Check that all environment variables are set in Netlify
-   - Clear Netlify cache: **Deploys** → **Trigger deploy** → **Clear cache and deploy**
+   - Verify Framework preset is set to "Next.js"
+   - Make sure `@netlify/plugin-nextjs` is in your package.json dependencies
 
 2. **App not working after deployment?**
    - Verify Firebase environment variables are correctly set
    - Check Netlify function logs for runtime errors
+   - Ensure you cleared the cache after updating netlify.toml
 
 3. **Images not loading?**
    - The app is configured to allow images from:
      - `placehold.co`
      - `images.unsplash.com`
      - `picsum.photos`
+
+### Quick Fix Checklist:
+
+✅ Updated `netlify.toml` to use `@netlify/plugin-nextjs`  
+✅ Installed `@netlify/plugin-nextjs` package  
+✅ Added Firebase environment variables to Netlify  
+✅ Framework preset set to "Next.js" in Netlify dashboard  
+✅ Cleared cache and redeployed  
+
+If you've completed all these steps and still see 404 errors, try:
+- Deleting and recreating the Netlify site
+- Checking the deploy logs for specific error messages
