@@ -37,16 +37,17 @@ export default function AdminLoginPage() {
         router.push('/admin');
         router.refresh();
       } else {
+        const errorData = await response.json();
         toast({
           title: 'Error',
-          description: 'Invalid password. Please try again.',
+          description: errorData.error || 'Invalid password. Please try again.',
           variant: 'destructive',
         });
       }
     } catch (error) {
       toast({
         title: 'Error',
-        description: 'An error occurred. Please try again.',
+        description: error instanceof Error ? error.message : 'An error occurred. Please try again.',
         variant: 'destructive',
       });
     } finally {
