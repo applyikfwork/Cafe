@@ -2,59 +2,85 @@
 
 export const dynamic = 'force-dynamic';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-
 import { Button } from '@/components/ui/button';
 import { VideoHero } from '@/components/ui/video-hero';
 import { DynamicGreeting } from '@/components/ui/dynamic-greeting';
 import { AnimatedButton } from '@/components/ui/animated-button';
 import { ScrollReveal } from '@/components/ui/scroll-reveal';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
-import { Clock, MapPin, Phone } from 'lucide-react';
+import { Clock, MapPin, Phone, TrendingUp, Sparkles, Coffee, UtensilsCrossed, Award, Heart } from 'lucide-react';
 import { useMenuItems } from '@/hooks/useMenuItems';
+import { useActivePromotions } from '@/hooks/usePromotions';
 import { initializeMockData } from '@/lib/firestore-service';
+import { formatCurrency } from '@/lib/utils';
 
 export default function Home() {
   const heroImage = PlaceHolderImages.find((img) => img.id === 'hero-cafe');
   const { items: menuItems, loading } = useMenuItems();
-  const featuredItems = menuItems.slice(0, 3);
+  const { promotions: activePromotions } = useActivePromotions();
+  const featuredItems = menuItems.filter(item => item.tags.includes('new' as any) || item.tags.includes('veg' as any)).slice(0, 3);
+  const now = new Date();
+  const topPromotion = activePromotions.find(p => 
+    p.active && 
+    p.title && 
+    p.description && 
+    new Date(p.startDate) <= now && 
+    new Date(p.endDate) >= now
+  );
 
-  // Initialize mock data on component mount
   useEffect(() => {
     initializeMockData();
   }, []);
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen bg-gradient-to-b from-background via-background to-muted/20">
       <Header />
       <main className="flex-1">
-        <VideoHero
-          fallbackImage={heroImage?.imageUrl || ''}
-        >
+        <VideoHero fallbackImage={heroImage?.imageUrl || ''}>
           <div className="h-full flex flex-col items-center justify-center text-center p-4">
             <DynamicGreeting />
             
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-headline font-bold tracking-tight drop-shadow-2xl animate-slide-down">
+            <h1 className="text-5xl md:text-7xl lg:text-8xl font-headline font-bold tracking-tight drop-shadow-2xl animate-slide-down bg-gradient-to-r from-white via-amber-50 to-white bg-clip-text">
               Cafe Central Station
             </h1>
-            <p className="mt-6 max-w-2xl text-lg md:text-xl text-stone-100 drop-shadow-lg animate-fade-in">
+            <p className="mt-6 max-w-3xl text-xl md:text-2xl text-stone-50 drop-shadow-lg animate-fade-in font-medium">
               Where every cup tells a story and every bite feels like home.
             </p>
+            
+            {topPromotion && (
+              <ScrollReveal direction="up" delay={0.2} className="mt-8">
+                <Card className="bg-gradient-to-r from-orange-500 to-red-500 border-0 shadow-2xl text-white max-w-md">
+                  <CardContent className="p-4 text-center">
+                    <div className="flex items-center justify-center gap-2 mb-2">
+                      <TrendingUp className="h-5 w-5" />
+                      <span className="font-bold text-lg">Limited Time Offer!</span>
+                    </div>
+                    <p className="text-2xl font-bold">{topPromotion.title}</p>
+                    <p className="text-white/90 mt-1">{topPromotion.description}</p>
+                  </CardContent>
+                </Card>
+              </ScrollReveal>
+            )}
+            
             <div className="mt-10 flex flex-col sm:flex-row gap-4">
               <AnimatedButton href="/menu" variant="primary" size="lg">
+                <Coffee className="mr-2 h-5 w-5" />
                 Order Now
               </AnimatedButton>
               <AnimatedButton href="#" variant="secondary" size="lg">
+                <UtensilsCrossed className="mr-2 h-5 w-5" />
                 Reserve a Table
               </AnimatedButton>
             </div>
 
-            <div className="mt-12 flex flex-wrap items-center justify-center gap-6 text-sm text-white/90 animate-slide-up">
+            <div className="mt-12 flex flex-wrap items-center justify-center gap-6 text-sm text-white/90 animate-slide-up backdrop-blur-sm bg-black/20 px-6 py-3 rounded-full">
               <div className="flex items-center gap-2">
                 <Clock className="h-4 w-4" />
                 <span>Open 7am - 9pm Daily</span>
@@ -71,58 +97,77 @@ export default function Home() {
           </div>
         </VideoHero>
 
-        <section className="py-20 md:py-32 bg-background relative">
-          <div className="container mx-auto px-4">
+        <section className="py-24 md:py-32 bg-background relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent" />
+          <div className="container mx-auto px-4 relative z-10">
             <ScrollReveal direction="up" className="text-center mb-16">
-              <h2 className="text-4xl md:text-5xl font-headline font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                Our Specialties
+              <Badge className="mb-4 bg-primary/10 text-primary border-primary/20 px-4 py-1">
+                <Sparkles className="h-3 w-3 mr-1" />
+                Handcrafted Excellence
+              </Badge>
+              <h2 className="text-5xl md:text-6xl font-headline font-bold bg-gradient-to-r from-primary via-orange-500 to-amber-500 bg-clip-text text-transparent">
+                Our Signature Dishes
               </h2>
-              <p className="mt-4 text-muted-foreground max-w-2xl mx-auto text-lg">
-                Discover the flavors that our regulars rave about. Handcrafted with love and the finest ingredients.
+              <p className="mt-6 text-muted-foreground max-w-2xl mx-auto text-lg leading-relaxed">
+                Discover the flavors that keep our guests coming back. Each dish is thoughtfully crafted 
+                with premium ingredients and served with passion.
               </p>
             </ScrollReveal>
 
             {loading ? (
-              <div className="flex justify-center items-center h-64">
+              <div className="flex justify-center items-center h-96">
                 <div className="text-center">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-                  <p className="text-muted-foreground">Loading menu...</p>
+                  <div className="relative">
+                    <div className="animate-spin rounded-full h-16 w-16 border-4 border-primary border-t-transparent mx-auto mb-4"></div>
+                    <Coffee className="h-8 w-8 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-primary" />
+                  </div>
+                  <p className="text-muted-foreground text-lg font-medium">Loading delicious options...</p>
                 </div>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
                 {featuredItems.map((item, index) => {
                   const itemImage = PlaceHolderImages.find((img) => img.id === item.imageId);
                   return (
-                    <ScrollReveal key={item.id} direction="up" delay={index * 0.1}>
-                      <Card className="group overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 border-2 hover:border-primary/50">
+                    <ScrollReveal key={item.id} direction="up" delay={index * 0.15}>
+                      <Card className="group overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-500 border-2 hover:border-primary/50 bg-card/50 backdrop-blur-sm h-full">
                         <CardHeader className="p-0 relative overflow-hidden">
                           {itemImage && (
-                            <div className="aspect-video relative">
+                            <div className="aspect-[4/3] relative">
                               <Image
                                 src={itemImage.imageUrl}
                                 alt={item.name}
                                 fill
-                                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
-                                className="object-cover transition-transform duration-700 group-hover:scale-110"
+                                sizes="(max-width: 768px) 100vw, 33vw"
+                                className="object-cover transition-all duration-700 group-hover:scale-110 group-hover:rotate-1"
                                 data-ai-hint={itemImage.imageHint}
                               />
-                              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-500" />
+                              {item.tags.includes('new' as any) && (
+                                <div className="absolute top-3 right-3 z-10">
+                                  <Badge className="bg-gradient-to-r from-yellow-500 to-amber-500 text-white border-0 shadow-lg">
+                                    <Sparkles className="h-3 w-3 mr-1" />
+                                    NEW
+                                  </Badge>
+                                </div>
+                              )}
                             </div>
                           )}
                         </CardHeader>
                         <CardContent className="p-6">
-                          <CardTitle className="font-headline text-2xl group-hover:text-primary transition-colors">
+                          <CardTitle className="font-headline text-2xl group-hover:text-primary transition-colors mb-3">
                             {item.name}
                           </CardTitle>
-                          <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
+                          <p className="text-muted-foreground text-sm leading-relaxed line-clamp-2">
                             {item.description}
                           </p>
-                          <div className="flex justify-between items-center mt-6">
-                            <p className="text-2xl font-bold text-primary">${item.price.toFixed(2)}</p>
+                          <div className="flex justify-between items-center mt-6 pt-4 border-t">
+                            <p className="text-3xl font-bold bg-gradient-to-r from-primary to-orange-500 bg-clip-text text-transparent">
+                              {formatCurrency(item.price)}
+                            </p>
                             <Button 
                               variant="outline" 
-                              className="group-hover:bg-primary group-hover:text-primary-foreground transition-all"
+                              className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-white border-0 group-hover:scale-105 transition-all shadow-md"
                             >
                               Add to Order
                             </Button>
@@ -135,47 +180,75 @@ export default function Home() {
               </div>
             )}
 
-            <ScrollReveal direction="up" delay={0.3} className="text-center mt-16">
+            <ScrollReveal direction="up" delay={0.4} className="text-center mt-16">
               <AnimatedButton href="/menu" variant="primary" size="lg">
-                View Full Menu →
+                Explore Full Menu
+                <TrendingUp className="ml-2 h-5 w-5" />
               </AnimatedButton>
             </ScrollReveal>
           </div>
         </section>
 
-        <section className="py-20 md:py-32 bg-gradient-to-br from-primary/10 via-background to-accent/10">
-          <div className="container mx-auto px-4">
-            <div className="grid md:grid-cols-2 gap-12 items-center">
+        <section className="py-24 md:py-32 bg-gradient-to-br from-primary/5 via-background to-orange-500/5 relative overflow-hidden">
+          <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center opacity-5" />
+          <div className="container mx-auto px-4 relative z-10">
+            <div className="grid md:grid-cols-2 gap-16 items-center max-w-6xl mx-auto">
               <ScrollReveal direction="left">
-                <div className="relative h-[400px] md:h-[500px] rounded-2xl overflow-hidden shadow-2xl">
+                <div className="relative h-[450px] md:h-[550px] rounded-3xl overflow-hidden shadow-2xl">
                   <Image
                     src="https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=800"
                     alt="Our Story"
                     fill
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 600px"
+                    sizes="(max-width: 768px) 100vw, 50vw"
                     className="object-cover"
                   />
+                  <div className="absolute inset-0 bg-gradient-to-t from-primary/20 to-transparent" />
                 </div>
               </ScrollReveal>
 
               <ScrollReveal direction="right">
                 <div>
-                  <h2 className="text-4xl md:text-5xl font-headline font-bold mb-6">
+                  <Badge className="mb-4 bg-primary/10 text-primary border-primary/20 px-4 py-1">
+                    <Heart className="h-3 w-3 mr-1" />
+                    Since 2010
+                  </Badge>
+                  <h2 className="text-5xl md:text-6xl font-headline font-bold mb-8 bg-gradient-to-r from-primary to-orange-500 bg-clip-text text-transparent">
                     Our Story
                   </h2>
-                  <p className="text-lg text-muted-foreground mb-6 leading-relaxed">
-                    Founded in 2010, Cafe Central Station has been the heart of our community for over a decade. 
-                    What started as a small coffee shop has grown into a beloved gathering place where friends meet, 
-                    ideas flourish, and memories are made.
-                  </p>
-                  <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
-                    We source our coffee beans from sustainable farms around the world and work with local bakers 
-                    to bring you the freshest pastries every morning. Every cup, every dish is crafted with passion 
-                    and served with a smile.
-                  </p>
-                  <AnimatedButton href="#" variant="primary">
-                    Learn More About Us
-                  </AnimatedButton>
+                  <div className="space-y-6">
+                    <p className="text-lg text-muted-foreground leading-relaxed">
+                      Founded in 2010, Cafe Central Station has been the beating heart of our community for over a decade. 
+                      What began as a humble coffee shop has blossomed into a cherished gathering place where friendships 
+                      are forged, ideas take flight, and unforgettable memories are created daily.
+                    </p>
+                    <p className="text-lg text-muted-foreground leading-relaxed">
+                      We partner with sustainable farms across the globe to source the finest coffee beans, and collaborate 
+                      with talented local bakers to ensure the freshest pastries greet you each morning. Every cup is poured 
+                      with precision, every dish is prepared with heart, and every experience is delivered with a genuine smile.
+                    </p>
+                    <div className="grid grid-cols-3 gap-6 pt-6">
+                      <div className="text-center">
+                        <Award className="h-10 w-10 text-primary mx-auto mb-2" />
+                        <p className="text-3xl font-bold text-primary">15+</p>
+                        <p className="text-sm text-muted-foreground">Awards</p>
+                      </div>
+                      <div className="text-center">
+                        <Coffee className="h-10 w-10 text-primary mx-auto mb-2" />
+                        <p className="text-3xl font-bold text-primary">10K+</p>
+                        <p className="text-sm text-muted-foreground">Daily Cups</p>
+                      </div>
+                      <div className="text-center">
+                        <Heart className="h-10 w-10 text-primary mx-auto mb-2" />
+                        <p className="text-3xl font-bold text-primary">50K+</p>
+                        <p className="text-sm text-muted-foreground">Happy Guests</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="mt-10">
+                    <AnimatedButton href="#" variant="primary" size="lg">
+                      Discover Our Journey
+                    </AnimatedButton>
+                  </div>
                 </div>
               </ScrollReveal>
             </div>

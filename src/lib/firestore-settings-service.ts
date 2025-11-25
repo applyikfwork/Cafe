@@ -74,10 +74,11 @@ export async function getSettings(): Promise<CafeSettings> {
 export async function updateSettings(updates: Partial<CafeSettings>): Promise<void> {
   try {
     const settingsRef = doc(db, 'settings', SETTINGS_DOC);
-    await updateDoc(settingsRef, {
+    await setDoc(settingsRef, {
       ...updates,
+      id: SETTINGS_DOC,
       updatedAt: Timestamp.now(),
-    });
+    }, { merge: true });
   } catch (error) {
     console.error('Error updating settings:', error);
     throw error;
