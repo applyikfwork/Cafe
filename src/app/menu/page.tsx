@@ -1,5 +1,7 @@
 'use client';
 
+export const dynamic = 'force-dynamic';
+
 import { useEffect } from 'react';
 import Image from 'next/image';
 import { Header } from '@/components/layout/header';

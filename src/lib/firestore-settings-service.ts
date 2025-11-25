@@ -21,7 +21,7 @@ export interface CafeSettings {
 }
 
 const SETTINGS_DOC = 'cafe-settings';
-const DEFAULT_SETTINGS: Omit<CafeSettings, 'updatedAt'> = {
+export const DEFAULT_SETTINGS: Omit<CafeSettings, 'updatedAt'> = {
   id: SETTINGS_DOC,
   name: 'Cafe Central Station',
   description: 'Where every cup tells a story and every bite feels like home.',
