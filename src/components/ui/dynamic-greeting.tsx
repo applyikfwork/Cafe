@@ -1,15 +1,14 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Coffee, Sun, Moon, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export function DynamicGreeting() {
-  const [greeting, setGreeting] = useState({ text: '', icon: Sun });
-  const [mounted, setMounted] = useState(false);
+  const [greeting, setGreeting] = useState({ text: 'Welcome', icon: Sun });
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
     const hour = new Date().getHours();
     
     if (hour >= 5 && hour < 12) {
@@ -21,16 +20,14 @@ export function DynamicGreeting() {
     } else {
       setGreeting({ text: 'Welcome', icon: Moon });
     }
+    setIsMounted(true);
   }, []);
-
-  if (!mounted) {
-    return null;
-  }
 
   const Icon = greeting.icon;
 
   return (
     <motion.div
+      suppressHydrationWarning
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, delay: 0.2 }}

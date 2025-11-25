@@ -2,16 +2,24 @@
 
 import { motion } from 'framer-motion';
 import { Sparkles, X } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export function TodaysSpecialBanner() {
   const [isVisible, setIsVisible] = useState(true);
+  const [mounted, setMounted] = useState(false);
 
-  if (!isVisible) return null;
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!isVisible) {
+    return <div suppressHydrationWarning className="h-0" />;
+  }
 
   return (
     <motion.div
-      initial={{ y: -100, opacity: 0 }}
+      suppressHydrationWarning
+      initial={{ y: mounted ? -100 : 0, opacity: mounted ? 0 : 1 }}
       animate={{ y: 0, opacity: 1 }}
       exit={{ y: -100, opacity: 0 }}
       className="bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_100%] animate-[gradient_3s_ease_infinite] text-white py-3 relative overflow-hidden"

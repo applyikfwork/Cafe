@@ -225,16 +225,28 @@ export async function deleteMenuItem(id: string): Promise<void> {
 // Subscribe to menu items (realtime)
 export function subscribeToMenuItems(callback: (items: MenuItem[]) => void): () => void {
   try {
-    const unsubscribe = onSnapshot(collection(db, 'menu'), (querySnapshot) => {
-      const items = querySnapshot.docs.map((doc) => ({
-        ...doc.data(),
-        id: doc.id,
-      } as MenuItem));
-      callback(items);
-    });
+    const unsubscribe = onSnapshot(
+      collection(db, 'menu'),
+      (querySnapshot) => {
+        const items = querySnapshot.docs.map((doc) => ({
+          ...doc.data(),
+          id: doc.id,
+        } as MenuItem));
+        callback(items);
+      },
+      (error) => {
+        console.error('Error subscribing to menu items:', error);
+        // Fallback to mock data if permission denied
+        if (error.code === 'permission-denied') {
+          callback(MOCK_MENU_ITEMS);
+        }
+      }
+    );
     return unsubscribe;
   } catch (error) {
     console.error('Error subscribing to menu items:', error);
+    // Return mock data if there's an error
+    callback(MOCK_MENU_ITEMS);
     return () => {};
   }
 }
@@ -246,16 +258,30 @@ export function subscribeToMenuItemsByCategory(
 ): () => void {
   try {
     const q = query(collection(db, 'menu'), where('category', '==', category));
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const items = querySnapshot.docs.map((doc) => ({
-        ...doc.data(),
-        id: doc.id,
-      } as MenuItem));
-      callback(items);
-    });
+    const unsubscribe = onSnapshot(
+      q,
+      (querySnapshot) => {
+        const items = querySnapshot.docs.map((doc) => ({
+          ...doc.data(),
+          id: doc.id,
+        } as MenuItem));
+        callback(items);
+      },
+      (error) => {
+        console.error('Error subscribing to menu items by category:', error);
+        // Fallback to mock data if permission denied
+        if (error.code === 'permission-denied') {
+          const filteredItems = MOCK_MENU_ITEMS.filter((item) => item.category === category);
+          callback(filteredItems);
+        }
+      }
+    );
     return unsubscribe;
   } catch (error) {
     console.error('Error subscribing to menu items by category:', error);
+    // Return filtered mock data if there's an error
+    const filteredItems = MOCK_MENU_ITEMS.filter((item) => item.category === category);
+    callback(filteredItems);
     return () => {};
   }
 }
