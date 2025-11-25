@@ -14,7 +14,8 @@ import {
   UtensilsCrossed, 
   PanelLeft,
   Users,
-  LogOut
+  LogOut,
+  Database
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -34,6 +35,7 @@ const adminNavItems = [
   { href: '/admin/promotions', label: 'Promotions', icon: Tag },
   { href: '/admin/staff', label: 'Staff', icon: Users },
   { href: '/admin/settings', label: 'Settings', icon: Settings },
+  { href: '/admin/firebase-status', label: 'Firebase Status', icon: Database },
 ];
 
 export default function AdminLayout({
