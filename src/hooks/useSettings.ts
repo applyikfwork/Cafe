@@ -6,7 +6,6 @@ import type { CafeSettings } from '@/lib/firestore-settings-service';
 
 export function useSettings() {
   const [settings, setSettings] = useState<CafeSettings>({
-    id: 'cafe-settings',
     ...DEFAULT_SETTINGS,
     updatedAt: new Date() as any,
   });
