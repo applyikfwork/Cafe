@@ -6,6 +6,7 @@ import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { ThemeToggle } from '@/components/theme-toggle';
 import { cn } from '@/lib/utils';
 
 const navLinks = [
@@ -83,8 +84,9 @@ export function Header() {
           <div className="w-full flex-1 md:w-auto md:flex-none">
             {/* Search can go here */}
           </div>
-          <nav className="flex items-center">
-            <Button asChild>
+          <nav className="flex items-center gap-2">
+            <ThemeToggle />
+            <Button asChild className="animate-pulse-soft">
               <Link href="/menu">Order Now</Link>
             </Button>
           </nav>
