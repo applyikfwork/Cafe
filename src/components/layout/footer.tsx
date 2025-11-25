@@ -3,9 +3,11 @@
 import { UtensilsCrossed, Twitter, Instagram, Facebook, Mail, MapPin, Phone, Clock } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
+import { useSettings } from '@/hooks/useSettings';
 
 export function Footer() {
   const [hoveredSocial, setHoveredSocial] = useState<string | null>(null);
+  const { settings } = useSettings();
 
   return (
     <footer className="bg-gradient-to-br from-muted/60 to-muted/30 border-t">
@@ -15,16 +17,16 @@ export function Footer() {
             <Link href="/" className="flex items-center space-x-2 mb-4 group">
               <UtensilsCrossed className="h-8 w-8 text-primary transition-transform group-hover:rotate-12" />
               <span className="text-xl font-bold font-headline group-hover:text-primary transition-colors">
-                Cafe Central Station
+                {settings?.name || 'Cafe Central Station'}
               </span>
             </Link>
             <p className="text-muted-foreground text-sm leading-relaxed">
-              Your favorite spot for coffee, comfort, and community since 2010.
+              {settings?.description || 'Your favorite spot for coffee, comfort, and community since 2010.'}
             </p>
             <div className="mt-4 space-y-2 text-sm">
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Clock className="h-4 w-4 text-primary" />
-                <span className="text-xs"><strong>Open:</strong> 7am - 9pm Daily</span>
+                <span className="text-xs"><strong>Open:</strong> {settings?.hours?.open} - {settings?.hours?.close}</span>
               </div>
             </div>
           </div>
@@ -55,15 +57,15 @@ export function Footer() {
             <ul className="space-y-3 text-sm text-muted-foreground">
               <li className="flex items-start gap-2 hover:text-primary transition-colors">
                 <MapPin className="h-4 w-4 mt-0.5 flex-shrink-0 text-primary" />
-                <span>123 Central Street<br/>Food City, FC 12345</span>
+                <span>{settings?.address || '123 Central Street\nFood City, FC 12345'}</span>
               </li>
               <li className="flex items-center gap-2 hover:text-primary transition-colors">
                 <Phone className="h-4 w-4 flex-shrink-0 text-primary" />
-                <a href="tel:+15551234567">(555) 123-4567</a>
+                <a href={`tel:${settings?.phone}`}>{settings?.phone || '(555) 123-4567'}</a>
               </li>
               <li className="flex items-center gap-2 hover:text-primary transition-colors">
                 <Mail className="h-4 w-4 flex-shrink-0 text-primary" />
-                <a href="mailto:hello@cafecentral.station">hello@cafecentral.station</a>
+                <a href={`mailto:${settings?.email}`}>{settings?.email || 'hello@cafecentral.station'}</a>
               </li>
             </ul>
           </div>
@@ -75,12 +77,12 @@ export function Footer() {
             </p>
             <div className="flex space-x-3">
               {[
-                { Icon: Twitter, name: 'twitter', href: 'https://twitter.com' },
-                { Icon: Instagram, name: 'instagram', href: 'https://instagram.com' },
-                { Icon: Facebook, name: 'facebook', href: 'https://facebook.com' }
-              ].map(({ Icon, name, href }) => (
+                { Icon: Twitter, name: 'twitter', key: 'twitter', href: settings?.socials?.twitter || 'https://twitter.com' },
+                { Icon: Instagram, name: 'instagram', key: 'instagram', href: settings?.socials?.instagram || 'https://instagram.com' },
+                { Icon: Facebook, name: 'facebook', key: 'facebook', href: settings?.socials?.facebook || 'https://facebook.com' }
+              ].map(({ Icon, name, key, href }) => (
                 <Link 
-                  key={name}
+                  key={key}
                   href={href}
                   target="_blank"
                   rel="noopener noreferrer"

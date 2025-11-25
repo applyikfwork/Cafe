@@ -18,6 +18,7 @@ import { Footer } from '@/components/layout/footer';
 import { Clock, MapPin, Phone, TrendingUp, Sparkles, Coffee, UtensilsCrossed, Award, Heart } from 'lucide-react';
 import { useMenuItems } from '@/hooks/useMenuItems';
 import { useActivePromotions } from '@/hooks/usePromotions';
+import { useSettings } from '@/hooks/useSettings';
 import { initializeMockData } from '@/lib/firestore-service';
 import { formatCurrency } from '@/lib/utils';
 
@@ -25,6 +26,7 @@ export default function Home() {
   const heroImage = PlaceHolderImages.find((img) => img.id === 'hero-cafe');
   const { items: menuItems, loading } = useMenuItems();
   const { promotions: activePromotions } = useActivePromotions();
+  const { settings } = useSettings();
   const featuredItems = menuItems.filter(item => item.tags.includes('new' as any) || item.tags.includes('veg' as any)).slice(0, 3);
   const now = new Date();
   const topPromotion = activePromotions.find(p => 
@@ -83,15 +85,15 @@ export default function Home() {
             <div className="mt-12 flex flex-wrap items-center justify-center gap-6 text-sm text-white/90 animate-slide-up backdrop-blur-sm bg-black/20 px-6 py-3 rounded-full">
               <div className="flex items-center gap-2">
                 <Clock className="h-4 w-4" />
-                <span>Open 7am - 9pm Daily</span>
+                <span>Open {settings?.hours?.open || '7am'} - {settings?.hours?.close || '9pm'} Daily</span>
               </div>
               <div className="flex items-center gap-2">
                 <MapPin className="h-4 w-4" />
-                <span>123 Central Street</span>
+                <span>{settings?.address?.split('\n')[0] || '123 Central Street'}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Phone className="h-4 w-4" />
-                <span>(555) 123-4567</span>
+                <span>{settings?.phone || '(555) 123-4567'}</span>
               </div>
             </div>
           </div>
