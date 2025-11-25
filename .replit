@@ -46,6 +46,10 @@ localPort = 36999
 externalPort = 3001
 
 [[ports]]
+localPort = 38881
+externalPort = 5000
+
+[[ports]]
 localPort = 40105
 externalPort = 4200
 
@@ -57,3 +61,8 @@ externalPort = 3002
 deploymentTarget = "autoscale"
 run = ["npm", "start"]
 build = ["npm", "run", "build"]
+
+[userenv]
+
+[userenv.shared]
+ADMIN_PASSWORD = "admin123"

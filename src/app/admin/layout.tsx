@@ -3,7 +3,7 @@
 export const dynamic = 'force-dynamic';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { 
   Home, 
   Book, 
@@ -13,7 +13,8 @@ import {
   Settings, 
   UtensilsCrossed, 
   PanelLeft,
-  Users
+  Users,
+  LogOut
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -22,6 +23,7 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
+import { useToast } from '@/hooks/use-toast';
 
 
 const adminNavItems = [
@@ -40,6 +42,28 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const { toast } = useToast();
+
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/admin/auth', {
+        method: 'DELETE',
+      });
+      toast({
+        title: 'Logged out',
+        description: 'You have been logged out successfully.',
+      });
+      router.push('/admin/login');
+      router.refresh();
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to logout. Please try again.',
+        variant: 'destructive',
+      });
+    }
+  };
 
   const navContent = (
     <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
@@ -72,6 +96,16 @@ export default function AdminLayout({
           <div className="flex-1">
             {navContent}
           </div>
+          <div className="p-4 border-t">
+            <Button
+              variant="outline"
+              className="w-full justify-start gap-2"
+              onClick={handleLogout}
+            >
+              <LogOut className="h-4 w-4" />
+              Logout
+            </Button>
+          </div>
         </div>
       </div>
       <div className="flex flex-col">
@@ -94,7 +128,19 @@ export default function AdminLayout({
                   <span>Cafe Central</span>
                 </Link>
               </div>
-              {navContent}
+              <div className="flex-1">
+                {navContent}
+              </div>
+              <div className="p-4 border-t mt-auto">
+                <Button
+                  variant="outline"
+                  className="w-full justify-start gap-2"
+                  onClick={handleLogout}
+                >
+                  <LogOut className="h-4 w-4" />
+                  Logout
+                </Button>
+              </div>
             </SheetContent>
           </Sheet>
           <div className="flex-1 text-center font-headline text-lg font-semibold">

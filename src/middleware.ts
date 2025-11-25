@@ -1,0 +1,26 @@
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { verifyAuthTokenEdge } from '@/lib/auth-utils';
+
+export async function middleware(request: NextRequest) {
+  const path = request.nextUrl.pathname;
+  
+  if (path.startsWith('/admin')) {
+    const authToken = request.cookies.get('admin_auth')?.value;
+    const isAuthenticated = authToken ? await verifyAuthTokenEdge(authToken) : false;
+    
+    if (!isAuthenticated && path !== '/admin/login') {
+      return NextResponse.redirect(new URL('/admin/login', request.url));
+    }
+    
+    if (isAuthenticated && path === '/admin/login') {
+      return NextResponse.redirect(new URL('/admin', request.url));
+    }
+  }
+  
+  return NextResponse.next();
+}
+
+export const config = {
+  matcher: '/admin/:path*',
+};

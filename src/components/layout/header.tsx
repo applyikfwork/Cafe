@@ -14,7 +14,6 @@ const navLinks = [
   { href: '/menu', label: 'Menu' },
   { href: '#', label: 'Book a Table' },
   { href: '#', label: 'Gallery' },
-  { href: '/admin', label: 'Admin' },
 ];
 
 export function Header() {
