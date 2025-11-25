@@ -59,6 +59,7 @@ export default function MenuPage() {
                                 src={itemImage.imageUrl}
                                 alt={item.name}
                                 fill
+                                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
                                 className="object-cover rounded-t-lg transition-transform duration-700 group-hover:scale-110"
                                 data-ai-hint={itemImage.imageHint}
                               />
@@ -110,6 +111,7 @@ export default function MenuPage() {
                                   src={itemImage.imageUrl}
                                   alt={item.name}
                                   fill
+                                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
                                   className="object-cover rounded-t-lg transition-transform duration-700 group-hover:scale-110"
                                   data-ai-hint={itemImage.imageHint}
                                 />
@@ -121,18 +123,26 @@ export default function MenuPage() {
                             <h3 className="font-headline text-xl font-semibold group-hover:text-primary transition-colors">{item.name}</h3>
                             <p className="text-muted-foreground text-sm mt-1 flex-grow leading-relaxed">{item.description}</p>
                           
-                          <div className="flex flex-wrap gap-2 mt-3">
-                            {item.tags.map(tag => (
-                              <Badge key={tag} variant="outline" className={tagColors[tag]}>{tag}</Badge>
-                            ))}
-                          </div>
-                          
-                          <div className="flex justify-between items-end mt-4">
-                            <p className="text-lg font-bold text-primary">{formatCurrency(item.price)}</p>
-                            <Button size="sm">Add</Button>
-                          </div>
-                        </CardContent>
-                      </Card>
+                            <div className="flex flex-wrap gap-2 mt-3">
+                              {item.tags.map(tag => (
+                                <Badge key={tag} variant="outline" className={`${tagColors[tag]} transition-all group-hover:scale-105`}>
+                                  {tag}
+                                </Badge>
+                              ))}
+                            </div>
+
+                            <div className="flex justify-between items-end mt-4">
+                              <p className="text-2xl font-bold text-primary">{formatCurrency(item.price)}</p>
+                              <Button 
+                                size="sm" 
+                                className="group-hover:bg-primary group-hover:scale-105 transition-all"
+                              >
+                                Add
+                              </Button>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </ScrollReveal>
                     );
                   })}
                 </div>

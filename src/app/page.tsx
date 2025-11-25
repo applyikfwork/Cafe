@@ -84,6 +84,7 @@ export default function Home() {
                               src={itemImage.imageUrl}
                               alt={item.name}
                               fill
+                              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
                               className="object-cover transition-transform duration-700 group-hover:scale-110"
                               data-ai-hint={itemImage.imageHint}
                             />
@@ -131,6 +132,7 @@ export default function Home() {
                     src="https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=800"
                     alt="Our Story"
                     fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 600px"
                     className="object-cover"
                   />
                 </div>
