@@ -8,6 +8,11 @@ Your admin panel changes (settings and promotions) are **not showing on the webs
 
 ---
 
+## Current Status
+
+✅ **Firebase SDK connected** - Credentials loaded successfully
+⚠️ **Firestore Database** - NOT YET CREATED (you need to do this next)
+
 ## Quick Setup (5 minutes)
 
 ### Step 1: Create a Firebase Project
