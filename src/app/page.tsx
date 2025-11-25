@@ -1,22 +1,31 @@
+'use client';
+
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { VideoHero } from '@/components/ui/video-hero';
 import { DynamicGreeting } from '@/components/ui/dynamic-greeting';
 import { AnimatedButton } from '@/components/ui/animated-button';
 import { ScrollReveal } from '@/components/ui/scroll-reveal';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
-import { menuItems } from '@/lib/data';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Clock, MapPin, Phone } from 'lucide-react';
+import { useMenuItems } from '@/hooks/useMenuItems';
+import { initializeMockData } from '@/lib/firestore-service';
 
 export default function Home() {
   const heroImage = PlaceHolderImages.find((img) => img.id === 'hero-cafe');
+  const { items: menuItems, loading } = useMenuItems();
   const featuredItems = menuItems.slice(0, 3);
+
+  // Initialize mock data on component mount
+  useEffect(() => {
+    initializeMockData();
+  }, []);
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -71,49 +80,58 @@ export default function Home() {
               </p>
             </ScrollReveal>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {featuredItems.map((item, index) => {
-                const itemImage = PlaceHolderImages.find((img) => img.id === item.imageId);
-                return (
-                  <ScrollReveal key={item.id} direction="up" delay={index * 0.1}>
-                    <Card className="group overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 border-2 hover:border-primary/50">
-                      <CardHeader className="p-0 relative overflow-hidden">
-                        {itemImage && (
-                          <div className="aspect-video relative">
-                            <Image
-                              src={itemImage.imageUrl}
-                              alt={item.name}
-                              fill
-                              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
-                              className="object-cover transition-transform duration-700 group-hover:scale-110"
-                              data-ai-hint={itemImage.imageHint}
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            {loading ? (
+              <div className="flex justify-center items-center h-64">
+                <div className="text-center">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+                  <p className="text-muted-foreground">Loading menu...</p>
+                </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {featuredItems.map((item, index) => {
+                  const itemImage = PlaceHolderImages.find((img) => img.id === item.imageId);
+                  return (
+                    <ScrollReveal key={item.id} direction="up" delay={index * 0.1}>
+                      <Card className="group overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 border-2 hover:border-primary/50">
+                        <CardHeader className="p-0 relative overflow-hidden">
+                          {itemImage && (
+                            <div className="aspect-video relative">
+                              <Image
+                                src={itemImage.imageUrl}
+                                alt={item.name}
+                                fill
+                                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
+                                className="object-cover transition-transform duration-700 group-hover:scale-110"
+                                data-ai-hint={itemImage.imageHint}
+                              />
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                            </div>
+                          )}
+                        </CardHeader>
+                        <CardContent className="p-6">
+                          <CardTitle className="font-headline text-2xl group-hover:text-primary transition-colors">
+                            {item.name}
+                          </CardTitle>
+                          <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
+                            {item.description}
+                          </p>
+                          <div className="flex justify-between items-center mt-6">
+                            <p className="text-2xl font-bold text-primary">${item.price.toFixed(2)}</p>
+                            <Button 
+                              variant="outline" 
+                              className="group-hover:bg-primary group-hover:text-primary-foreground transition-all"
+                            >
+                              Add to Order
+                            </Button>
                           </div>
-                        )}
-                      </CardHeader>
-                      <CardContent className="p-6">
-                        <CardTitle className="font-headline text-2xl group-hover:text-primary transition-colors">
-                          {item.name}
-                        </CardTitle>
-                        <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
-                          {item.description}
-                        </p>
-                        <div className="flex justify-between items-center mt-6">
-                          <p className="text-2xl font-bold text-primary">${item.price.toFixed(2)}</p>
-                          <Button 
-                            variant="outline" 
-                            className="group-hover:bg-primary group-hover:text-primary-foreground transition-all"
-                          >
-                            Add to Order
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </ScrollReveal>
-                );
-              })}
-            </div>
+                        </CardContent>
+                      </Card>
+                    </ScrollReveal>
+                  );
+                })}
+              </div>
+            )}
 
             <ScrollReveal direction="up" delay={0.3} className="text-center mt-16">
               <AnimatedButton href="/menu" variant="primary" size="lg">

@@ -1,3 +1,6 @@
+'use client';
+
+import { useEffect } from 'react';
 import Image from 'next/image';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
@@ -6,11 +9,13 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollReveal } from '@/components/ui/scroll-reveal';
 import { TodaysSpecialBanner } from '@/components/ui/todays-special-banner';
-import { categories, menuItems } from '@/lib/data';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { formatCurrency } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import type { Tag } from '@/types';
+import { useMenuItems } from '@/hooks/useMenuItems';
+import { initializeMockData } from '@/lib/firestore-service';
+import { categories } from '@/lib/data';
 
 const tagColors: Record<Tag, string> = {
   veg: 'border-green-500/80 bg-green-500/10 text-green-700 dark:text-green-400',
@@ -20,6 +25,64 @@ const tagColors: Record<Tag, string> = {
 };
 
 export default function MenuPage() {
+  const { items: menuItems, loading } = useMenuItems();
+
+  // Initialize mock data on component mount
+  useEffect(() => {
+    initializeMockData();
+  }, []);
+
+  const renderMenuGrid = (items: typeof menuItems) => (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      {items.map((item, index) => {
+        const itemImage = PlaceHolderImages.find((img) => img.id === item.imageId);
+        return (
+          <ScrollReveal key={item.id} direction="up" delay={index * 0.05}>
+            <Card className="group flex flex-col h-full hover:shadow-2xl transition-all duration-500 border-2 hover:border-primary/50 overflow-hidden">
+              <CardHeader className="p-0 relative overflow-hidden">
+                {itemImage && (
+                  <div className="aspect-video relative">
+                    <Image
+                      src={itemImage.imageUrl}
+                      alt={item.name}
+                      fill
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
+                      className="object-cover rounded-t-lg transition-transform duration-700 group-hover:scale-110"
+                      data-ai-hint={itemImage.imageHint}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  </div>
+                )}
+              </CardHeader>
+              <CardContent className="p-4 flex flex-col flex-1">
+                <h3 className="font-headline text-xl font-semibold group-hover:text-primary transition-colors">{item.name}</h3>
+                <p className="text-muted-foreground text-sm mt-1 flex-grow leading-relaxed">{item.description}</p>
+              
+                <div className="flex flex-wrap gap-2 mt-3">
+                  {item.tags.map(tag => (
+                    <Badge key={tag} variant="outline" className={`${tagColors[tag]} transition-all group-hover:scale-105`}>
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
+
+                <div className="flex justify-between items-end mt-4">
+                  <p className="text-2xl font-bold text-primary">{formatCurrency(item.price)}</p>
+                  <Button 
+                    size="sm" 
+                    className="group-hover:bg-primary group-hover:scale-105 transition-all"
+                  >
+                    Add
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </ScrollReveal>
+        );
+      })}
+    </div>
+  );
+
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
@@ -35,120 +98,35 @@ export default function MenuPage() {
             </p>
           </ScrollReveal>
 
-          <Tabs defaultValue="all" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 sm:w-auto sm:grid-flow-col">
-              <TabsTrigger value="all">All</TabsTrigger>
-              {categories.map((category) => (
-                <TabsTrigger key={category.id} value={category.id}>
-                  {category.name}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-
-            <TabsContent value="all" className="mt-8">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {menuItems.map((item, index) => {
-                  const itemImage = PlaceHolderImages.find((img) => img.id === item.imageId);
-                  return (
-                    <ScrollReveal key={item.id} direction="up" delay={index * 0.05}>
-                      <Card className="group flex flex-col h-full hover:shadow-2xl transition-all duration-500 border-2 hover:border-primary/50 overflow-hidden">
-                        <CardHeader className="p-0 relative overflow-hidden">
-                          {itemImage && (
-                            <div className="aspect-video relative">
-                              <Image
-                                src={itemImage.imageUrl}
-                                alt={item.name}
-                                fill
-                                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
-                                className="object-cover rounded-t-lg transition-transform duration-700 group-hover:scale-110"
-                                data-ai-hint={itemImage.imageHint}
-                              />
-                              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                            </div>
-                          )}
-                        </CardHeader>
-                        <CardContent className="p-4 flex flex-col flex-1">
-                          <h3 className="font-headline text-xl font-semibold group-hover:text-primary transition-colors">{item.name}</h3>
-                          <p className="text-muted-foreground text-sm mt-1 flex-grow leading-relaxed">{item.description}</p>
-                          
-                          <div className="flex flex-wrap gap-2 mt-3">
-                            {item.tags.map(tag => (
-                              <Badge key={tag} variant="outline" className={`${tagColors[tag]} transition-all group-hover:scale-105`}>
-                                {tag}
-                              </Badge>
-                            ))}
-                          </div>
-
-                          <div className="flex justify-between items-end mt-4">
-                            <p className="text-2xl font-bold text-primary">{formatCurrency(item.price)}</p>
-                            <Button 
-                              size="sm" 
-                              className="group-hover:bg-primary group-hover:scale-105 transition-all"
-                            >
-                              Add
-                            </Button>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </ScrollReveal>
-                  );
-                })}
+          {loading ? (
+            <div className="flex justify-center items-center h-64">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+                <p className="text-muted-foreground">Loading menu...</p>
               </div>
-            </TabsContent>
+            </div>
+          ) : (
+            <Tabs defaultValue="all" className="w-full">
+              <TabsList className="grid w-full grid-cols-2 sm:w-auto sm:grid-flow-col">
+                <TabsTrigger value="all">All</TabsTrigger>
+                {categories.map((category) => (
+                  <TabsTrigger key={category.id} value={category.id}>
+                    {category.name}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
 
-            {categories.map((category) => (
-              <TabsContent key={category.id} value={category.id} className="mt-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                  {menuItems.filter(item => item.category === category.id).map((item, index) => {
-                    const itemImage = PlaceHolderImages.find((img) => img.id === item.imageId);
-                    return (
-                      <ScrollReveal key={item.id} direction="up" delay={index * 0.05}>
-                        <Card className="group flex flex-col h-full hover:shadow-2xl transition-all duration-500 border-2 hover:border-primary/50 overflow-hidden">
-                          <CardHeader className="p-0 relative overflow-hidden">
-                            {itemImage && (
-                              <div className="aspect-video relative">
-                                <Image
-                                  src={itemImage.imageUrl}
-                                  alt={item.name}
-                                  fill
-                                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
-                                  className="object-cover rounded-t-lg transition-transform duration-700 group-hover:scale-110"
-                                  data-ai-hint={itemImage.imageHint}
-                                />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                              </div>
-                            )}
-                          </CardHeader>
-                          <CardContent className="p-4 flex flex-col flex-1">
-                            <h3 className="font-headline text-xl font-semibold group-hover:text-primary transition-colors">{item.name}</h3>
-                            <p className="text-muted-foreground text-sm mt-1 flex-grow leading-relaxed">{item.description}</p>
-                          
-                            <div className="flex flex-wrap gap-2 mt-3">
-                              {item.tags.map(tag => (
-                                <Badge key={tag} variant="outline" className={`${tagColors[tag]} transition-all group-hover:scale-105`}>
-                                  {tag}
-                                </Badge>
-                              ))}
-                            </div>
-
-                            <div className="flex justify-between items-end mt-4">
-                              <p className="text-2xl font-bold text-primary">{formatCurrency(item.price)}</p>
-                              <Button 
-                                size="sm" 
-                                className="group-hover:bg-primary group-hover:scale-105 transition-all"
-                              >
-                                Add
-                              </Button>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      </ScrollReveal>
-                    );
-                  })}
-                </div>
+              <TabsContent value="all" className="mt-8">
+                {renderMenuGrid(menuItems)}
               </TabsContent>
-            ))}
-          </Tabs>
+
+              {categories.map((category) => (
+                <TabsContent key={category.id} value={category.id} className="mt-8">
+                  {renderMenuGrid(menuItems.filter(item => item.category === category.id))}
+                </TabsContent>
+              ))}
+            </Tabs>
+          )}
         </div>
       </main>
       <Footer />

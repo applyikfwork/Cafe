@@ -1,7 +1,7 @@
 # Cafe Central Station - Next.js Application
 
 ## Overview
-A modern cafe website built with Next.js 15, featuring a public-facing menu showcase and an admin dashboard for managing menu items. The application uses Google Genkit AI to generate compelling menu item descriptions.
+A modern cafe website built with Next.js 15, featuring a public-facing menu showcase and an admin dashboard for managing menu items. The application uses Google Genkit AI to generate compelling menu item descriptions and Firebase Firestore for real-time data management.
 
 **Technology Stack:**
 - Next.js 15.3.3 with TypeScript
@@ -9,9 +9,11 @@ A modern cafe website built with Next.js 15, featuring a public-facing menu show
 - Tailwind CSS for styling
 - Radix UI component library
 - Google Genkit AI for menu description generation
-- Firebase deployment ready (apphosting.yaml)
+- Firebase Firestore for real-time database with mock data initialization
+- Framer Motion for smooth animations
+- next-themes for dark/light mode toggle
 
-**Current State:** Fully configured for Replit environment with development server running on port 5000.
+**Current State:** Fully configured for Replit environment with Firebase integration, real-time updates, and 10 mock menu items for demo.
 
 ## Project Structure
 
@@ -31,38 +33,60 @@ A modern cafe website built with Next.js 15, featuring a public-facing menu show
 │   │   │   │   └── page.tsx    # Menu management page
 │   │   │   ├── layout.tsx      # Admin layout with sidebar
 │   │   │   └── page.tsx        # Admin dashboard
-│   │   ├── menu/               # Public menu page
+│   │   ├── menu/               # Public menu page (Firebase-connected)
 │   │   │   └── page.tsx
-│   │   ├── layout.tsx          # Root layout
-│   │   ├── page.tsx            # Home page
-│   │   └── globals.css         # Global styles
+│   │   ├── layout.tsx          # Root layout with theme provider
+│   │   ├── page.tsx            # Home page (Firebase-connected)
+│   │   └── globals.css         # Global styles with cafe color palette
 │   ├── components/
 │   │   ├── layout/             # Header and Footer components
-│   │   └── ui/                 # Reusable UI components (shadcn/ui)
+│   │   ├── ui/                 # Reusable UI components (shadcn/ui + custom animations)
+│   │   │   ├── video-hero.tsx
+│   │   │   ├── dynamic-greeting.tsx
+│   │   │   ├── animated-button.tsx
+│   │   │   ├── parallax-section.tsx
+│   │   │   ├── scroll-reveal.tsx
+│   │   │   ├── todays-special-banner.tsx
+│   │   │   └── theme-toggle.tsx
+│   │   ├── theme-provider.tsx   # next-themes provider setup
+│   │   └── ...
+│   ├── hooks/
+│   │   └── useMenuItems.ts      # Custom hook for Firebase real-time menu data
 │   ├── lib/
-│   │   ├── data.ts             # Menu items and categories data
+│   │   ├── firebase.ts          # Firebase initialization with secrets
+│   │   ├── firestore-service.ts # Firestore CRUD operations + mock data initialization
+│   │   ├── data.ts              # Static categories data
 │   │   ├── placeholder-images.ts # Image placeholder data
-│   │   └── utils.ts            # Utility functions
+│   │   └── utils.ts             # Utility functions
 │   └── types/
-│       └── index.ts            # TypeScript type definitions
-├── next.config.ts              # Next.js configuration
-├── tailwind.config.ts          # Tailwind CSS configuration
-├── tsconfig.json               # TypeScript configuration
-├── apphosting.yaml             # Firebase App Hosting config
-└── package.json                # Dependencies and scripts
+│       └── index.ts             # TypeScript type definitions
+├── next.config.ts               # Next.js configuration
+├── tailwind.config.ts           # Tailwind CSS configuration with custom animations
+├── tsconfig.json                # TypeScript configuration
+├── apphosting.yaml              # Firebase App Hosting config
+├── replit.md                    # Project documentation
+└── package.json                 # Dependencies and scripts
 ```
 
 ## Key Features
 
 ### Public-Facing
-- **Home Page**: Hero section with featured menu items
-- **Menu Page**: Filterable menu by category with images and descriptions
+- **Home Page**: Enhanced hero section with video background, dynamic greetings, animated CTAs, scroll-triggered animations, and "Our Story" section
+- **Menu Page**: Real-time filterable menu by category with micro-interactions, hover effects, scroll reveals, and "Today's Special" banner
+- **Animations**: Framer Motion animations including parallax scrolling, scroll reveals, fade-in effects, and micro-interactions
+- **Dark/Light Theme**: Full theme toggle with warm cafe color palette (coffee browns, cream, coral tones)
 - **Responsive Design**: Mobile-first approach with Tailwind CSS
 
 ### Admin Dashboard
 - **Dashboard**: Overview of bookings, orders, and occupancy
 - **Menu Management**: Add, edit, and manage menu items
 - **AI-Powered Descriptions**: Generate menu descriptions using Google Gemini
+
+### Firebase Integration
+- **Real-time Updates**: Menu items sync in real-time from Firestore
+- **Mock Data**: 10 demo menu items auto-initialized on first load
+- **Custom Hook**: `useMenuItems` hook for easy real-time subscription to menu data
+- **Firestore Service**: Complete CRUD operations with real-time listeners
 
 ## Configuration
 
@@ -71,6 +95,14 @@ A modern cafe website built with Next.js 15, featuring a public-facing menu show
 - **Host**: 0.0.0.0 (accessible from Replit proxy)
 - **Allowed Dev Origins**: Configured to accept Replit's proxy requests
 
+### Firebase Secrets (Environment Variables)
+- `NEXT_PUBLIC_FIREBASE_API_KEY`
+- `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN`
+- `NEXT_PUBLIC_FIREBASE_PROJECT_ID`
+- `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET`
+- `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID`
+- `NEXT_PUBLIC_FIREBASE_APP_ID`
+
 ### Scripts
 - `npm run dev` - Start development server on port 5000
 - `npm run build` - Production build
@@ -78,34 +110,44 @@ A modern cafe website built with Next.js 15, featuring a public-facing menu show
 - `npm run genkit:dev` - Start Genkit development tools
 
 ## Dependencies
-All dependencies are already installed via `package.json`. Key dependencies include:
-- Next.js 15 with React 18
-- Genkit AI libraries for Google AI
-- Radix UI components
-- Firebase SDK
-- Tailwind CSS with animations
+All dependencies installed via `package.json`. Key additions:
+- framer-motion (animations)
+- next-themes (dark mode)
+- react-intersection-observer (scroll animations)
+- firebase (Firestore database)
+- firebase-admin (server-side Firebase)
+- @genkit-ai/google-genai (Google AI)
+- genkit (AI orchestration)
+- All Radix UI components for accessible UI
 
-## Environment Variables
-The application uses Google Genkit AI which may require:
-- `GOOGLE_API_KEY` or similar Google AI credentials for AI features
-
-## Recent Changes
-- **2025-11-25**: Project imported from GitHub and configured for Replit
-  - Updated dev server to port 5000 with 0.0.0.0 host
-  - Configured Next.js to allow Replit proxy origins
-  - Set up workflow for automatic server restart
-  - Installed all npm dependencies
+## Recent Changes (2025-11-25)
+- **Firebase Integration**: Connected Firestore with real-time data subscription
+- **Mock Data System**: 10 demo menu items auto-initialize on first Firebase connect
+- **Real-time Hooks**: Created `useMenuItems` hook for subscribing to live menu data
+- **Updated Pages**: Home and menu pages now fetch from Firebase instead of static data
+- **Firestore Service**: Complete service layer with CRUD operations and real-time listeners
+- **Loading States**: Added loading indicators while Firebase data loads
+- **Client Components**: Converted home and menu pages to client components for Firebase integration
 
 ## Architecture Decisions
-- **No Database**: Currently uses in-memory data from `src/lib/data.ts`
-- **Firebase Ready**: Configured for Firebase App Hosting deployment
-- **AI Integration**: Uses Google Genkit for extensible AI capabilities
-- **Component Library**: Uses shadcn/ui pattern for customizable components
+- **Firestore Real-time**: Using Firestore listeners for instant data sync across all users
+- **Mock Data Initialization**: Automatic demo data injection for new Firebase projects
+- **Custom Hooks**: Abstracted Firebase logic into reusable hooks for clean component code
+- **Client-side Rendering**: Pages use 'use client' for real-time Firebase subscriptions
+- **Warm Color Palette**: Primary #FF6B35 (coral), Secondary #F7F3EF (cream), Accents in coffee browns
+- **Animation-first Design**: Framer Motion for smooth, delightful micro-interactions throughout
 
 ## User Preferences
-None documented yet.
+- Warm cafe aesthetic with coral, cream, and coffee brown colors
+- Smooth animations and micro-interactions for engagement
+- Real-time data updates from Firebase
+- Dark/light theme support with automatic detection
 
-## Notes
-- The project includes Firebase SDK but no active Firebase initialization
-- TypeScript and ESLint build errors are ignored in production builds
-- The AI features require Google API credentials to function
+## Next Steps
+- Complete admin authentication with Firebase Auth
+- Add order management system
+- Implement customer reservations
+- Add payment processing with Stripe
+- Enhanced mobile optimizations (bottom navigation, swipeable cards)
+- Customer gallery and reviews section
+- Newsletter subscription integration
