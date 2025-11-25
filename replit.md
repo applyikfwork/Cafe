@@ -122,7 +122,28 @@ All dependencies installed via `package.json`. Key additions:
 
 ## Recent Changes (2025-11-25)
 
-### Admin Panel Error Handling Fixes (Latest - November 25, 2025)
+### Complete Admin System Overhaul (Latest - November 25, 2025)
+- **Currency Changed to INR**: All prices now display in Indian Rupees (₹) instead of USD ($)
+  - Updated `formatCurrency` utility to use INR with en-IN locale
+  - Applies to menu page, admin panel, and all price displays
+- **Admin Link Hidden**: Removed admin link from public navigation bar
+  - Admin panel only accessible via direct URL: `/admin`
+  - Prevents casual users from discovering admin panel
+- **Secure Password Protection**: Implemented robust authentication system
+  - HMAC-SHA256 signed tokens using Web Crypto API (Edge Runtime compatible)
+  - Timing-safe signature verification to prevent attacks
+  - Admin login page at `/admin/login` with password requirement
+  - Logout functionality in admin sidebar (both desktop and mobile)
+  - Environment variables: `ADMIN_PASSWORD` (required) and `SESSION_SECRET` (auto-configured)
+  - 7-day session expiration with timestamp validation
+- **Admin Authentication Files**:
+  - `/admin/login` - Password-protected login page
+  - `src/middleware.ts` - Route protection middleware
+  - `src/app/api/admin/auth/route.ts` - Authentication API
+  - `src/lib/auth-utils.ts` - Centralized auth utilities
+- **Default Admin Password**: Currently set to `admin123` (CHANGE THIS IMMEDIATELY for production)
+
+### Admin Panel Error Handling Fixes (November 25, 2025)
 - **Fixed Settings Page Loading**: Resolved infinite loading issue caused by duplicate 'id' property in useSettings hook
 - **Firebase Null Safety**: Updated Firebase initialization to gracefully handle missing credentials with proper null checks
 - **Improved Error Messages**: All admin operations now display specific error messages instead of generic failures
@@ -205,6 +226,8 @@ To use the admin panel's save functionality, you need to add your Firebase crede
 - Smooth animations and micro-interactions for engagement
 - Real-time data updates from Firebase
 - Dark/light theme support with automatic detection
+- Indian Rupee (INR) currency for all pricing
+- Secure admin panel accessible only via password
 
 ## Next Steps
 - Complete admin authentication with Firebase Auth
