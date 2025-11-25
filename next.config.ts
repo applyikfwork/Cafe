@@ -31,6 +31,7 @@ const nextConfig: NextConfig = {
     ],
   },
   experimental: {
+    // @ts-ignore - allowedDevOrigins is supported but not yet in types
     allowedDevOrigins: ['*'],
   },
 };
