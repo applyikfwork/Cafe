@@ -6,7 +6,16 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function formatCurrency(amount: number, currency = 'INR') {
-  return new Intl.NumberFormat('en-IN', {
+  const formatted = new Intl.NumberFormat('en-IN', {
+    style: 'decimal',
+  }).format(amount);
+
+  if (currency === 'INR') {
+    return `₹${formatted}`;
+  }
+
+  // Fallback for other currencies
+  return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency,
   }).format(amount);
