@@ -59,7 +59,7 @@ export default function Home() {
               </>
             ) : (
               <>
-                <h1 className="text-5xl md:text-7xl lg:text-8xl font-headline font-bold tracking-tight drop-shadow-2xl animate-slide-down bg-gradient-to-r from-white via-amber-50 to-white bg-clip-text">
+                <h1 className="text-5xl md:text-7xl lg:text-8xl font-headline font-bold tracking-tight drop-shadow-2xl animate-slide-down bg-gradient-to-r from-white via-amber-50 to-white bg-clip-text text-transparent">
                   {settings.name}
                 </h1>
                 <p className="mt-6 max-w-3xl text-xl md:text-2xl text-stone-50 drop-shadow-lg animate-fade-in font-medium">
