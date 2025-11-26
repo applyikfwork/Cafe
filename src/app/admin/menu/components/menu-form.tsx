@@ -164,7 +164,7 @@ export function MenuForm({ menuItem, onFormSubmit }: MenuFormProps) {
     setIsSaving(true);
     
     try {
-      let imageUrl = menuItem?.imageUrl;
+      let imageUrl = menuItem?.imageUrl || undefined;
       const itemId = menuItem?.id || `item-${Date.now()}`;
 
       if (selectedFile) {
@@ -174,15 +174,20 @@ export function MenuForm({ menuItem, onFormSubmit }: MenuFormProps) {
         });
         
         try {
-          imageUrl = await uploadMenuImage(selectedFile, itemId);
+          const uploadPromise = uploadMenuImage(selectedFile, itemId);
+          const timeoutPromise = new Promise<never>((_, reject) => 
+            setTimeout(() => reject(new Error('Image upload timed out. Saving without image.')), 30000)
+          );
+          
+          imageUrl = await Promise.race([uploadPromise, timeoutPromise]);
         } catch (uploadError) {
+          console.error('Image upload error:', uploadError);
           toast({
             variant: 'destructive',
             title: 'Image upload failed',
-            description: uploadError instanceof Error ? uploadError.message : 'Failed to upload image',
+            description: 'Saving menu item without image. You can add the image later.',
           });
-          setIsSaving(false);
-          return;
+          imageUrl = undefined;
         }
       }
 

@@ -98,9 +98,14 @@ export async function uploadMenuImage(file: File, itemId: string): Promise<strin
 
   let imageBlob: Blob;
   
-  if (file.size > MAX_FILE_SIZE) {
-    imageBlob = await compressImage(file);
-  } else {
+  try {
+    if (file.size > MAX_FILE_SIZE) {
+      imageBlob = await compressImage(file);
+    } else {
+      imageBlob = file;
+    }
+  } catch (compressionError) {
+    console.error('Image compression failed:', compressionError);
     imageBlob = file;
   }
 
@@ -108,11 +113,16 @@ export async function uploadMenuImage(file: File, itemId: string): Promise<strin
   const extension = file.type === 'image/png' ? 'jpg' : file.name.split('.').pop() || 'jpg';
   const fileName = `menu-images/${itemId}_${timestamp}.${extension}`;
   
-  const storageRef = ref(storage, fileName);
-  await uploadBytes(storageRef, imageBlob);
-  
-  const downloadUrl = await getDownloadURL(storageRef);
-  return downloadUrl;
+  try {
+    const storageRef = ref(storage, fileName);
+    await uploadBytes(storageRef, imageBlob);
+    
+    const downloadUrl = await getDownloadURL(storageRef);
+    return downloadUrl;
+  } catch (uploadError) {
+    console.error('Firebase upload error:', uploadError);
+    throw new Error('Failed to upload image to storage. Please try again.');
+  }
 }
 
 export async function deleteMenuImage(imageUrl: string): Promise<void> {
