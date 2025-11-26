@@ -6,7 +6,8 @@ import { z } from 'zod';
 import { useState, useTransition, useRef } from 'react';
 import { Sparkles, Upload, X, ImageIcon, Loader2 } from 'lucide-react';
 import { addMenuItem, updateMenuItem } from '@/lib/firestore-service';
-import { uploadMenuImage, formatFileSize, compressImage } from '@/lib/image-utils';
+import { uploadToCloudinary } from '@/lib/cloudinary';
+import { formatFileSize, compressImage } from '@/lib/image-utils';
 import { useCategories } from '@/hooks/use-categories';
 
 import { Button } from '@/components/ui/button';
@@ -168,23 +169,22 @@ export function MenuForm({ menuItem, onFormSubmit }: MenuFormProps) {
       const itemId = menuItem?.id || `item-${Date.now()}`;
 
       if (selectedFile) {
-        console.log('Starting image upload for file:', selectedFile.name, 'Size:', selectedFile.size);
+        console.log('Starting image upload to Cloudinary:', selectedFile.name, 'Size:', selectedFile.size);
         toast({
           title: 'Uploading image...',
           description: 'Please wait while we upload your image.',
         });
         
         try {
-          imageUrl = await uploadMenuImage(selectedFile, itemId);
-          console.log('Image uploaded successfully:', imageUrl);
+          imageUrl = await uploadToCloudinary(selectedFile);
+          console.log('Image uploaded successfully to Cloudinary:', imageUrl);
           toast({
             title: 'Image uploaded!',
             description: 'Image uploaded successfully.',
           });
         } catch (uploadError) {
-          console.error('Image upload error:', uploadError);
+          console.error('Cloudinary upload error:', uploadError);
           const errorMessage = uploadError instanceof Error ? uploadError.message : 'Unknown error';
-          console.error('Error details:', errorMessage);
           toast({
             variant: 'destructive',
             title: 'Image upload failed',
