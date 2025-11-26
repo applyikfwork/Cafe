@@ -3,7 +3,7 @@
 
 export const dynamic = 'force-dynamic';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -20,15 +20,23 @@ import { Clock, MapPin, Phone, TrendingUp, Sparkles, Coffee, UtensilsCrossed, Aw
 import { useMenuItems } from '@/hooks/useMenuItems';
 import { useActivePromotions } from '@/hooks/usePromotions';
 import { useSettings } from '@/hooks/useSettings';
+import { useTodaysSpecial } from '@/hooks/useTodaysSpecial';
 import { initializeMockData } from '@/lib/firestore-service';
 import { formatCurrency } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import { format } from 'date-fns';
 
 export default function Home() {
+  const [mounted, setMounted] = useState(false);
   const { items: menuItems, loading: menuLoading } = useMenuItems();
   const { promotions: activePromotions } = useActivePromotions();
   const { settings, loading: settingsLoading } = useSettings();
+  const { special } = useTodaysSpecial();
+  
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+  
   const featuredItems = menuItems.filter(item => item.tags.includes('new' as any) || item.tags.includes('veg' as any)).slice(0, 3);
   const now = new Date();
   const topPromotion = activePromotions.find(p => 

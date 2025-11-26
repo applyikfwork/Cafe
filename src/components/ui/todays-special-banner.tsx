@@ -3,16 +3,18 @@
 import { motion } from 'framer-motion';
 import { Sparkles, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useTodaysSpecial } from '@/hooks/useTodaysSpecial';
 
 export function TodaysSpecialBanner() {
   const [isVisible, setIsVisible] = useState(true);
   const [mounted, setMounted] = useState(false);
+  const { special } = useTodaysSpecial();
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  if (!isVisible) {
+  if (!mounted || !isVisible || !special.active) {
     return <div suppressHydrationWarning className="h-0" />;
   }
 
@@ -27,7 +29,7 @@ export function TodaysSpecialBanner() {
       <div className="container mx-auto px-4 flex items-center justify-center gap-2 md:gap-3">
         <Sparkles className="h-4 w-4 md:h-5 md:w-5 animate-pulse-soft flex-shrink-0" />
         <p className="text-xs sm:text-sm md:text-base font-medium text-center line-clamp-2">
-          <strong>Today's Special:</strong> Pumpkin Spice Latte + Cinnamon Roll Combo - Only <span className="currency-symbol">₹</span>8.99!
+          <strong>Today's Special:</strong> {special.title} - Only <span className="currency-symbol">₹</span>{special.price}!
         </p>
         <button
           onClick={() => setIsVisible(false)}

@@ -12,8 +12,11 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useSettings } from '@/hooks/useSettings';
+import { useTodaysSpecial } from '@/hooks/useTodaysSpecial';
 import { updateSettings } from '@/lib/firestore-settings-service';
+import { updateTodaysSpecial } from '@/lib/firestore-todays-special-service';
 import { useToast } from '@/hooks/use-toast';
+import { Upload, Coffee, Image as ImageIcon } from 'lucide-react';
 
 const settingsSchema = z.object({
   name: z.string().min(2),
@@ -32,9 +35,11 @@ const settingsSchema = z.object({
 type SettingsFormValues = z.infer<typeof settingsSchema>;
 
 export default function AdminSettingsPage() {
-  const { settings, loading } = useSettings();
+  const { settings, loading: settingsLoading } = useSettings();
+  const { special, loading: specialLoading } = useTodaysSpecial();
   const { toast } = useToast();
   const [isSaving, setIsSaving] = useState(false);
+  const [heroImagePreview, setHeroImagePreview] = useState<string>('');
 
   const form = useForm<SettingsFormValues>({
     resolver: zodResolver(settingsSchema),
@@ -64,12 +69,74 @@ export default function AdminSettingsPage() {
         hoursOpen: settings.hours.open,
         hoursClose: settings.hours.close,
         heroImageUrl: settings.heroImageUrl || '',
-        twitterUrl: settings.socials.twitter,
-        instagramUrl: settings.socials.instagram,
-        facebookUrl: settings.socials.facebook,
+        twitterUrl: settings.socials?.twitter || '',
+        instagramUrl: settings.socials?.instagram || '',
+        facebookUrl: settings.socials?.facebook || '',
       });
+      setHeroImagePreview(settings.heroImageUrl || '');
     }
   }, [settings, form]);
+
+  const handleHeroImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsSaving(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('upload_preset', 'menu_uploads');
+
+      const response = await fetch('https://api.cloudinary.com/v1_1/dqyrrekte/image/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await response.json();
+      if (data.secure_url) {
+        setHeroImagePreview(data.secure_url);
+        form.setValue('heroImageUrl', data.secure_url);
+        toast({
+          title: 'Success!',
+          description: 'Hero image uploaded successfully.',
+        });
+      }
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to upload hero image.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleSaveTodaysSpecial = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSaving(true);
+    try {
+      await updateTodaysSpecial({
+        title: (document.getElementById('special-title') as HTMLInputElement)?.value,
+        description: (document.getElementById('special-description') as HTMLInputElement)?.value,
+        price: parseFloat((document.getElementById('special-price') as HTMLInputElement)?.value),
+        active: (document.getElementById('special-active') as HTMLInputElement)?.checked ?? true,
+      });
+      
+      toast({
+        title: 'Success!',
+        description: "Today's Special updated successfully.",
+      });
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: "Failed to update Today's Special.",
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   async function onSubmit(values: SettingsFormValues) {
     setIsSaving(true);
@@ -108,7 +175,7 @@ export default function AdminSettingsPage() {
     }
   }
 
-  if (loading) {
+  if (settingsLoading || specialLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
@@ -120,12 +187,139 @@ export default function AdminSettingsPage() {
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-lg font-semibold md:text-2xl font-headline">Settings</h1>
-        <p className="text-sm text-muted-foreground">Customize your cafe's information. Changes are live immediately.</p>
+        <h1 className="text-3xl font-bold mb-2">Settings & Special</h1>
+        <p className="text-muted-foreground">Manage your cafe settings, hero image, and Today's Special</p>
       </div>
 
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 space-y-6">
+          {/* Hero Image Section */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <ImageIcon className="h-5 w-5" />
+                Hero Image
+              </CardTitle>
+              <CardDescription>Upload a beautiful hero image for your homepage</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="relative">
+                {heroImagePreview ? (
+                  <div className="relative w-full aspect-video rounded-lg overflow-hidden bg-muted">
+                    <img src={heroImagePreview} alt="Hero preview" className="w-full h-full object-cover" />
+                    <div className="absolute inset-0 bg-black/30 flex items-center justify-center hover:bg-black/50 transition-all cursor-pointer group">
+                      <label className="cursor-pointer w-full h-full flex items-center justify-center">
+                        <div className="text-center opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Upload className="h-8 w-8 text-white mx-auto" />
+                          <p className="text-sm text-white mt-2">Change Image</p>
+                        </div>
+                        <input type="file" accept="image/*" onChange={handleHeroImageUpload} className="hidden" />
+                      </label>
+                    </div>
+                  </div>
+                ) : (
+                  <label className="border-2 border-dashed rounded-lg p-12 text-center cursor-pointer hover:bg-muted transition-colors block">
+                    <ImageIcon className="h-12 w-12 text-muted-foreground mx-auto mb-2" />
+                    <p className="text-sm text-muted-foreground mb-2">Click to upload hero image</p>
+                    <p className="text-xs text-muted-foreground">PNG, JPG up to 10MB</p>
+                    <input type="file" accept="image/*" onChange={handleHeroImageUpload} className="hidden" />
+                  </label>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Today's Special Section */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Coffee className="h-5 w-5" />
+                Today's Special
+              </CardTitle>
+              <CardDescription>Set what appears in the banner at the top of the menu page</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSaveTodaysSpecial} className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Special Item Title</label>
+                  <Input
+                    id="special-title"
+                    defaultValue={special.title}
+                    placeholder="e.g., Pumpkin Spice Latte + Combo"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Description</label>
+                  <Input
+                    id="special-description"
+                    defaultValue={special.description}
+                    placeholder="e.g., Seasonal favorite with fresh pastry"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Price (₹)</label>
+                  <Input
+                    id="special-price"
+                    type="number"
+                    step="0.01"
+                    defaultValue={special.price}
+                    placeholder="9.99"
+                  />
+                </div>
+                <div className="flex items-center gap-4">
+                  <label className="text-sm font-medium">Status</label>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      const checkbox = document.getElementById('special-active') as HTMLInputElement;
+                      checkbox.checked = !checkbox.checked;
+                      (e.currentTarget as HTMLElement).classList.toggle('bg-green-500/20');
+                      (e.currentTarget as HTMLElement).classList.toggle('bg-muted');
+                    }}
+                    className={`px-4 py-2 rounded-lg transition-all ${
+                      special.active
+                        ? 'bg-green-500/20 text-green-700 dark:text-green-400'
+                        : 'bg-muted text-muted-foreground'
+                    }`}
+                  >
+                    {special.active ? 'Active' : 'Inactive'}
+                  </button>
+                  <input id="special-active" type="checkbox" defaultChecked={special.active} className="hidden" />
+                </div>
+                <Button type="submit" disabled={isSaving} className="w-full">
+                  {isSaving ? 'Saving...' : 'Save Today\'s Special'}
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Preview Card */}
+        <div>
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Preview</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="bg-gradient-to-r from-primary via-accent to-primary text-white p-4 rounded-lg">
+                <div className="flex items-center gap-2 mb-2">
+                  <Coffee className="h-4 w-4" />
+                  <span className="font-bold text-xs">Today's Special</span>
+                </div>
+                <p className="font-bold text-sm">{special.title}</p>
+                <p className="text-xs text-white/80 mt-1">{special.description}</p>
+                <p className="text-lg font-bold mt-2">
+                  <span className="currency-symbol">₹</span>{special.price}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      {/* Cafe Settings */}
       <Card>
         <CardHeader>
           <CardTitle>Cafe Information</CardTitle>
@@ -133,7 +327,7 @@ export default function AdminSettingsPage() {
         </CardHeader>
         <CardContent>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6" suppressHydrationWarning>
               <FormField
                 control={form.control}
                 name="name"
