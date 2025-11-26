@@ -1,3 +1,4 @@
+
 'use client';
 
 export const dynamic = 'force-dynamic';
@@ -213,8 +214,7 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="py-24 md:py-32 bg-gradient-to-br from-primary/5 via-background to-orange-500/5 relative overflow-hidden">
-          <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center opacity-5" />
+        <section className="py-24 md:py-32 bg-gradient-to-br from-primary/5 via-background to-orange-500/5 relative">
           <div className="container mx-auto px-4 relative z-10">
             <div className="grid md:grid-cols-2 gap-16 items-center max-w-6xl mx-auto">
               <ScrollReveal direction="left">
