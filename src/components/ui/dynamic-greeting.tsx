@@ -6,7 +6,6 @@ import { motion } from 'framer-motion';
 
 export function DynamicGreeting() {
   const [greeting, setGreeting] = useState({ text: 'Welcome', icon: Sun });
-  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
     const hour = new Date().getHours();
@@ -20,7 +19,6 @@ export function DynamicGreeting() {
     } else {
       setGreeting({ text: 'Welcome', icon: Moon });
     }
-    setIsMounted(true);
   }, []);
 
   const Icon = greeting.icon;
@@ -34,7 +32,7 @@ export function DynamicGreeting() {
       className="inline-flex items-center gap-2 px-4 py-2 bg-background/20 text-white border border-white/30 rounded-full backdrop-blur-sm mb-4"
     >
       <Icon className="h-4 w-4 animate-pulse-soft" />
-      <span className="text-sm font-medium">{greeting.text}!</span>
+      <span className="text-sm font-medium" suppressHydrationWarning>{greeting.text}!</span>
     </motion.div>
   );
 }
