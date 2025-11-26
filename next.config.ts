@@ -40,7 +40,7 @@ const nextConfig: NextConfig = {
     // Kept for any future experimental flags
   },
   allowedDevOrigins: [
-    'https://6000-firebase-studio-1764069556200.cluster-6dx7corvpngoivimwvvljgokdw.cloudworkstations.dev',
+    'https://6ac952c2-99e2-4322-b5f2-eba8d99413d1-00-25s4ldpet5fa1.pike.replit.dev',
   ],
 };
 
