@@ -23,6 +23,7 @@ import { useSettings } from '@/hooks/useSettings';
 import { initializeMockData } from '@/lib/firestore-service';
 import { formatCurrency } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
+import { format } from 'date-fns';
 
 export default function Home() {
   const { items: menuItems, loading: menuLoading } = useMenuItems();
@@ -121,6 +122,68 @@ export default function Home() {
             </div>
           </div>
         </VideoHero>
+
+        {topPromotion && (
+          <section className="py-12 md:py-16 bg-gradient-to-r from-red-500/10 via-orange-500/10 to-red-500/10 relative overflow-hidden border-y">
+            <div className="absolute inset-0 opacity-10">
+              <div className="absolute top-0 right-0 w-96 h-96 bg-primary rounded-full mix-blend-multiply filter blur-3xl animate-pulse" />
+              <div className="absolute bottom-0 left-0 w-96 h-96 bg-accent rounded-full mix-blend-multiply filter blur-3xl animate-pulse" />
+            </div>
+            <div className="container mx-auto px-4 relative z-10">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                <ScrollReveal direction="left">
+                  <div>
+                    <span className="inline-block text-primary font-semibold text-sm md:text-base mb-4 px-4 py-2 bg-primary/10 rounded-full">🎉 LIMITED TIME</span>
+                    <h2 className="text-3xl md:text-5xl font-headline font-bold mb-4">
+                      {topPromotion.title}
+                    </h2>
+                    <p className="text-lg md:text-xl text-muted-foreground mb-6 leading-relaxed">
+                      {topPromotion.description}
+                    </p>
+                    <div className="flex flex-wrap gap-3 md:gap-4 items-center">
+                      <div className="text-4xl md:text-5xl font-bold text-primary">
+                        {topPromotion.type === 'percentage' ? `${topPromotion.value}%` : 
+                         topPromotion.type === 'fixed' ? `₹${topPromotion.value}` : 'BOGO'}
+                        <span className="text-lg md:text-2xl ml-2 text-muted-foreground">OFF</span>
+                      </div>
+                      <AnimatedButton href="/menu" variant="primary" size="lg">
+                        Claim Now
+                      </AnimatedButton>
+                    </div>
+                  </div>
+                </ScrollReveal>
+                <ScrollReveal direction="right">
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-accent/20 rounded-3xl blur-3xl" />
+                    <Card className="relative bg-gradient-to-br from-primary/5 to-accent/5 border-2 border-primary/20 p-8">
+                      <CardContent className="space-y-6">
+                        <div className="text-center">
+                          <div className="text-6xl md:text-7xl font-bold text-primary mb-2">
+                            {topPromotion.type === 'percentage' ? `${topPromotion.value}%` : 
+                             topPromotion.type === 'fixed' ? <><span className="currency-symbol">₹</span>{topPromotion.value}</> : 'BOGO'}
+                          </div>
+                          <p className="text-xl text-muted-foreground font-semibold">DISCOUNT</p>
+                        </div>
+                        <div className="bg-white/50 dark:bg-white/10 rounded-xl p-4 text-center">
+                          <p className="text-sm text-muted-foreground mb-2">Valid from</p>
+                          <p className="font-semibold">
+                            {format(new Date(topPromotion.startDate), 'MMM dd')} - {format(new Date(topPromotion.endDate), 'MMM dd')}
+                          </p>
+                        </div>
+                        {topPromotion.code && (
+                          <div className="bg-primary/10 rounded-xl p-4 text-center">
+                            <p className="text-xs text-muted-foreground mb-1">Use Code</p>
+                            <code className="text-2xl font-bold text-primary">{topPromotion.code}</code>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </div>
+                </ScrollReveal>
+              </div>
+            </div>
+          </section>
+        )}
 
         <section className="py-24 md:py-32 bg-background relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent" />

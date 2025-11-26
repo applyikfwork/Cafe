@@ -19,6 +19,26 @@ export interface Category {
   name: string;
 }
 
+export interface TodaysSpecial {
+  id: string;
+  title: string;
+  description: string;
+  price: number;
+  active: boolean;
+  updatedAt?: Date;
+}
+
+export interface CafeSettings {
+  id: string;
+  name: string;
+  description: string;
+  heroImageUrl?: string;
+  hours: { open: string; close: string };
+  address: string;
+  phone: string;
+  updatedAt?: Date;
+}
+
 export type PromotionType = 'percentage' | 'fixed' | 'bogo';
 
 export interface Promotion {
