@@ -233,56 +233,58 @@ export default function Home() {
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     {featuredItems.map((item, index) => {
-                  const itemImage = PlaceHolderImages.find((img) => img.id === item.imageId);
-                  return (
-                    <ScrollReveal key={item.id} direction="up" delay={index * 0.15}>
-                      <Card className="group overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-500 border-2 hover:border-primary/50 bg-card/50 backdrop-blur-sm h-full">
-                        <CardHeader className="p-0 relative overflow-hidden">
-                          {itemImage && (
-                            <div className="aspect-[4/3] relative">
-                              <Image
-                                src={itemImage.imageUrl}
-                                alt={item.name}
-                                fill
-                                sizes="(max-width: 768px) 100vw, 33vw"
-                                className="object-cover transition-all duration-700 group-hover:scale-110 group-hover:rotate-1"
-                                data-ai-hint={itemImage.imageHint}
-                              />
-                              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-500" />
-                              {item.tags.includes('new' as any) && (
-                                <div className="absolute top-3 right-3 z-10">
-                                  <Badge className="bg-gradient-to-r from-yellow-500 to-amber-500 text-white border-0 shadow-lg">
-                                    <Sparkles className="h-3 w-3 mr-1" />
-                                    NEW
-                                  </Badge>
+                      const itemImage = PlaceHolderImages.find((img) => img.id === item.imageId);
+                      return (
+                        <ScrollReveal key={item.id} direction="up" delay={index * 0.15}>
+                          <Card className="group overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-500 border-2 hover:border-primary/50 bg-card/50 backdrop-blur-sm h-full">
+                            <CardHeader className="p-0 relative overflow-hidden">
+                              {itemImage && (
+                                <div className="aspect-[4/3] relative">
+                                  <Image
+                                    src={itemImage.imageUrl}
+                                    alt={item.name}
+                                    fill
+                                    sizes="(max-width: 768px) 100vw, 33vw"
+                                    className="object-cover transition-all duration-700 group-hover:scale-110 group-hover:rotate-1"
+                                    data-ai-hint={itemImage.imageHint}
+                                  />
+                                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-500" />
+                                  {item.tags.includes('new' as any) && (
+                                    <div className="absolute top-3 right-3 z-10">
+                                      <Badge className="bg-gradient-to-r from-yellow-500 to-amber-500 text-white border-0 shadow-lg">
+                                        <Sparkles className="h-3 w-3 mr-1" />
+                                        NEW
+                                      </Badge>
+                                    </div>
+                                  )}
                                 </div>
                               )}
-                            </div>
-                          )}
-                        </CardHeader>
-                        <CardContent className="p-6">
-                          <CardTitle className="font-headline text-2xl group-hover:text-primary transition-colors mb-3">
-                            {item.name}
-                          </CardTitle>
-                          <p className="text-muted-foreground text-sm leading-relaxed line-clamp-2">
-                            {item.description}
-                          </p>
-                          <div className="flex justify-between items-center mt-6 pt-4 border-t">
-                            <p className="text-3xl font-bold bg-gradient-to-r from-primary to-orange-500 bg-clip-text text-transparent">
-                              <span className="currency-symbol">₹</span>{new Intl.NumberFormat('en-IN').format(item.price)}
-                            </p>
-                            <Button 
-                              variant="outline" 
-                              className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-white border-0 group-hover:scale-105 transition-all shadow-md"
-                            >
-                              Add to Order
-                            </Button>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </ScrollReveal>
-                  );
-                })}
+                            </CardHeader>
+                            <CardContent className="p-6">
+                              <CardTitle className="font-headline text-2xl group-hover:text-primary transition-colors mb-3">
+                                {item.name}
+                              </CardTitle>
+                              <p className="text-muted-foreground text-sm leading-relaxed line-clamp-2">
+                                {item.description}
+                              </p>
+                              <div className="flex justify-between items-center mt-6 pt-4 border-t">
+                                <p className="text-3xl font-bold bg-gradient-to-r from-primary to-orange-500 bg-clip-text text-transparent">
+                                  <span className="currency-symbol">₹</span>{new Intl.NumberFormat('en-IN').format(item.price)}
+                                </p>
+                                <Button 
+                                  variant="outline" 
+                                  className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-white border-0 group-hover:scale-105 transition-all shadow-md"
+                                >
+                                  Add to Order
+                                </Button>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </ScrollReveal>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             )}
 
@@ -294,6 +296,15 @@ export default function Home() {
             </ScrollReveal>
           </div>
         </section>
+
+        {/* Stats Section */}
+        <StatsSection />
+
+        {/* Testimonials */}
+        <TestimonialsSection />
+
+        {/* Call to Action */}
+        <CTASection />
 
         <section className="py-24 md:py-32 bg-gradient-to-br from-primary/5 via-background to-orange-500/5 relative">
           <div className="container mx-auto px-4 relative z-10">
