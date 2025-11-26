@@ -4,12 +4,12 @@ import { getFirestore, Firestore } from 'firebase/firestore';
 import { getStorage, FirebaseStorage } from 'firebase/storage';
 
 const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  apiKey: "AIzaSyAW5NJpnzkSLBm8YLTIW7SOipfGxIHUPgk",
+  authDomain: "studio-9442656101-dd68d.firebaseapp.com",
+  projectId: "studio-9442656101-dd68d",
+  storageBucket: "studio-9442656101-dd68d.appspot.com",
+  messagingSenderId: "99077314924",
+  appId: "1:99077314924:web:0c309e8b3f382b02ecbb49"
 };
 
 const isConfigured = firebaseConfig.apiKey && 
@@ -24,12 +24,12 @@ let storage: FirebaseStorage | null = null;
 
 if (isConfigured) {
   try {
-    app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
-    auth = getAuth(app);
-    db = getFirestore(app);
-    storage = getStorage(app);
-    
+    // Only initialize on the client side
     if (typeof window !== 'undefined') {
+      app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+      auth = getAuth(app);
+      db = getFirestore(app);
+      storage = getStorage(app);
       console.log('Firebase initialized successfully');
     }
   } catch (error) {
@@ -37,7 +37,7 @@ if (isConfigured) {
   }
 } else {
   if (typeof window !== 'undefined') {
-    console.warn('Firebase is not configured. Please add your Firebase credentials to Replit Secrets and restart the development server.');
+    console.warn('Firebase is not configured. Please add your Firebase credentials to your environment variables.');
   }
 }
 

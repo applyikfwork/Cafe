@@ -1,4 +1,5 @@
-export type Tag = 'veg' | 'spicy' | 'gluten-free' | 'new';
+export const tags = ['veg', 'spicy', 'gluten-free', 'new'] as const;
+export type Tag = typeof tags[number];
 
 export interface MenuItem {
   id: string;

@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/sheet';
 import { MenuForm } from './menu-form';
 import type { MenuItem } from '@/types';
+import { useState } from 'react';
 
 interface MenuFormSheetProps {
   children: React.ReactNode;
@@ -17,10 +18,12 @@ interface MenuFormSheetProps {
 }
 
 export function MenuFormSheet({ children, menuItem }: MenuFormSheetProps) {
+  const [open, setOpen] = useState(false);
+  
   return (
-    <Sheet>
+    <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>{children}</SheetTrigger>
-      <SheetContent className="sm:max-w-xl">
+      <SheetContent className="sm:max-w-xl overflow-y-auto">
         <SheetHeader>
           <SheetTitle className="font-headline">
             {menuItem ? 'Edit Menu Item' : 'Add New Menu Item'}
@@ -31,7 +34,10 @@ export function MenuFormSheet({ children, menuItem }: MenuFormSheetProps) {
               : "Fill in the details for your new menu item. Click 'Generate' to create a description with AI."}
           </SheetDescription>
         </SheetHeader>
-        <MenuForm menuItem={menuItem} />
+        <MenuForm 
+          menuItem={menuItem}
+          onFormSubmit={() => setOpen(false)} 
+        />
       </SheetContent>
     </Sheet>
   );

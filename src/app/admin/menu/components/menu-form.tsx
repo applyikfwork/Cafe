@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { useTransition } from 'react';
 import { Sparkles } from 'lucide-react';
+import { addMenuItem, updateMenuItem } from '@/lib/firestore-service';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -29,6 +30,9 @@ import { useToast } from '@/hooks/use-toast';
 import { generateDescriptionAction } from '../actions';
 import { categories } from '@/lib/data';
 import type { MenuItem } from '@/types';
+import { Checkbox } from '@/components/ui/checkbox';
+import { tags as availableTags } from '@/types';
+
 
 const formSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters.'),
@@ -36,17 +40,21 @@ const formSchema = z.object({
   category: z.string().min(1, 'Please select a category.'),
   ingredients: z.string().min(3, 'List at least one ingredient.'),
   description: z.string().optional(),
+  tags: z.array(z.string()).optional(),
+  imageId: z.string().optional(), // You might want to add a way to select images
 });
 
 type MenuFormValues = z.infer<typeof formSchema>;
 
 interface MenuFormProps {
   menuItem?: MenuItem;
+  onFormSubmit?: () => void;
 }
 
-export function MenuForm({ menuItem }: MenuFormProps) {
+export function MenuForm({ menuItem, onFormSubmit }: MenuFormProps) {
   const { toast } = useToast();
-  const [isPending, startTransition] = useTransition();
+  const [isAiPending, startAiTransition] = useTransition();
+  const [isSubmitPending, startSubmitTransition] = useTransition();
 
   const defaultValues = menuItem ? {
     name: menuItem.name,
@@ -54,12 +62,16 @@ export function MenuForm({ menuItem }: MenuFormProps) {
     category: menuItem.category,
     ingredients: menuItem.ingredients.join(', '),
     description: menuItem.description,
+    tags: menuItem.tags,
+    imageId: menuItem.imageId
   } : {
     name: '',
     price: 0,
     category: '',
     ingredients: '',
     description: '',
+    tags: [],
+    imageId: 'placeholder'
   };
   
   const form = useForm<MenuFormValues>({
@@ -70,7 +82,7 @@ export function MenuForm({ menuItem }: MenuFormProps) {
   const handleGenerateDescription = () => {
     const { name, category, ingredients } = form.getValues();
     
-    startTransition(async () => {
+    startAiTransition(async () => {
       const result = await generateDescriptionAction({ name, category, ingredients });
       if (result.error) {
         toast({
@@ -88,11 +100,38 @@ export function MenuForm({ menuItem }: MenuFormProps) {
     });
   };
 
-  function onSubmit(values: MenuFormValues) {
-    console.log(values);
-    toast({
-      title: 'Menu Item Saved!',
-      description: `The item "${values.name}" has been saved successfully.`,
+  async function onSubmit(values: MenuFormValues) {
+    const itemData = {
+      ...values,
+      ingredients: values.ingredients.split(',').map(s => s.trim()).filter(Boolean),
+      tags: values.tags || [],
+    };
+    
+    startSubmitTransition(async () => {
+      try {
+        if (menuItem) {
+          await updateMenuItem(menuItem.id, itemData);
+          toast({
+            title: 'Menu Item Updated!',
+            description: `The item "${values.name}" has been updated successfully.`,
+          });
+        } else {
+          await addMenuItem(itemData as Omit<MenuItem, 'id'>);
+          toast({
+            title: 'Menu Item Added!',
+            description: `The item "${values.name}" has been added successfully.`,
+          });
+          form.reset();
+        }
+        onFormSubmit?.();
+      } catch (error) {
+        console.error('Failed to save menu item', error);
+        toast({
+          variant: 'destructive',
+          title: 'Save Failed',
+          description: error instanceof Error ? error.message : 'Could not save the menu item.',
+        });
+      }
     });
   }
 
@@ -141,7 +180,7 @@ export function MenuForm({ menuItem }: MenuFormProps) {
                   </FormControl>
                   <SelectContent>
                     {categories.map(cat => (
-                      <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>
+                      <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -170,6 +209,57 @@ export function MenuForm({ menuItem }: MenuFormProps) {
             </FormItem>
           )}
         />
+
+        <FormField
+          control={form.control}
+          name="tags"
+          render={() => (
+            <FormItem>
+              <div className="mb-4">
+                <FormLabel className="text-base">Tags</FormLabel>
+                <FormDescription>
+                  Select tags that apply to this menu item.
+                </FormDescription>
+              </div>
+              <div className="flex flex-wrap gap-4">
+                {availableTags.map((tag) => (
+                  <FormField
+                    key={tag}
+                    control={form.control}
+                    name="tags"
+                    render={({ field }) => {
+                      return (
+                        <FormItem
+                          key={tag}
+                          className="flex flex-row items-start space-x-3 space-y-0"
+                        >
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value?.includes(tag)}
+                              onCheckedChange={(checked) => {
+                                return checked
+                                  ? field.onChange([...(field.value || []), tag])
+                                  : field.onChange(
+                                      field.value?.filter(
+                                        (value) => value !== tag
+                                      )
+                                    )
+                              }}
+                            />
+                          </FormControl>
+                          <FormLabel className="font-normal capitalize">
+                            {tag}
+                          </FormLabel>
+                        </FormItem>
+                      )
+                    }}
+                  />
+                ))}
+              </div>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         
         <FormField
           control={form.control}
@@ -183,11 +273,11 @@ export function MenuForm({ menuItem }: MenuFormProps) {
                   variant="outline" 
                   size="sm"
                   onClick={handleGenerateDescription}
-                  disabled={isPending}
+                  disabled={isAiPending}
                   className="gap-1.5"
                 >
                   <Sparkles className="h-4 w-4" />
-                  {isPending ? 'Generating...' : 'Generate with AI'}
+                  {isAiPending ? 'Generating...' : 'Generate with AI'}
                 </Button>
               </div>
               <FormControl>
@@ -203,7 +293,9 @@ export function MenuForm({ menuItem }: MenuFormProps) {
         />
 
         <div className="flex justify-end">
-          <Button type="submit">Save Item</Button>
+          <Button type="submit" disabled={isSubmitPending}>
+            {isSubmitPending ? 'Saving...' : 'Save Item'}
+          </Button>
         </div>
       </form>
     </Form>
