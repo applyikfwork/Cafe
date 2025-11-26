@@ -15,13 +15,18 @@ import { TodaysSpecialBanner } from '@/components/ui/todays-special-banner';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { formatCurrency } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
-import type { Tag } from '@/types';
+import type { Tag, MenuItem } from '@/types';
 import { useMenuItems } from '@/hooks/useMenuItems';
 import { useActivePromotions } from '@/hooks/usePromotions';
 import { useCategories } from '@/hooks/use-categories';
 import { initializeMockData } from '@/lib/firestore-service';
 import { Search, Sparkles, TrendingUp, Leaf, Flame, ShieldCheck, Star, ChefHat, ImageIcon } from 'lucide-react';
 import Link from 'next/link';
+import { SwipeableMenuCards } from '@/components/menu/swipeable-menu-cards';
+import { CategoryPills } from '@/components/menu/category-pills';
+import { FullScreenItemPreview } from '@/components/menu/full-screen-item-preview';
+import { StickyCartBar } from '@/components/menu/sticky-cart-bar';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const tagColors: Record<Tag, string> = {
   veg: 'border-green-500/80 bg-green-500/10 text-green-700 dark:text-green-400',
@@ -43,6 +48,11 @@ export default function MenuPage() {
   const { categories, loading: categoriesLoading } = useCategories();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [cartItems, setCartItems] = useState<Array<{ item: MenuItem; quantity: number }>>([]);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     initializeMockData();
@@ -100,6 +110,24 @@ export default function MenuPage() {
     }
   };
 
+  const handleAddToCart = (item: MenuItem, quantity: number) => {
+    setCartItems((prev) => {
+      const existing = prev.find((ci) => ci.item.id === item.id);
+      if (existing) {
+        return prev.map((ci) =>
+          ci.item.id === item.id ? { ...ci, quantity: ci.quantity + quantity } : ci
+        );
+      }
+      return [...prev, { item, quantity }];
+    });
+  };
+
+  const cartTotal = cartItems.reduce((total, ci) => {
+    const promotion = getItemPromotion(ci.item.id);
+    const discountedPrice = calculateDiscountedPrice(ci.item.price, promotion);
+    return total + (discountedPrice || ci.item.price) * ci.quantity;
+  }, 0);
+
   const renderMenuGrid = (items: typeof menuItems) => {
     const filteredItems = filterItems(items);
     
@@ -123,6 +151,23 @@ export default function MenuPage() {
       );
     }
 
+    // Mobile swipeable view
+    if (isMobile) {
+      return (
+        <div className="space-y-4">
+          <SwipeableMenuCards
+            items={filteredItems}
+            onItemClick={(item) => {
+              setSelectedItem(item);
+              setIsPreviewOpen(true);
+            }}
+            getItemPromotion={getItemPromotion}
+            calculateDiscountedPrice={calculateDiscountedPrice}
+          />
+        </div>
+      );
+    }
+
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredItems.map((item, index) => {
@@ -134,8 +179,13 @@ export default function MenuPage() {
           
           return (
             <ScrollReveal key={item.id} direction="up" delay={index * 0.05}>
-              <Link href={`/menu/${item.id}`}>
-              <Card className="group relative flex flex-col h-full hover:shadow-2xl transition-all duration-500 border-2 hover:border-primary/50 overflow-hidden bg-card/50 backdrop-blur-sm cursor-pointer">
+              <Card 
+                className="group relative flex flex-col h-full hover:shadow-2xl transition-all duration-500 border-2 hover:border-primary/50 overflow-hidden bg-card/50 backdrop-blur-sm cursor-pointer"
+                onClick={() => {
+                  setSelectedItem(item);
+                  setIsPreviewOpen(true);
+                }}
+              >
                 {promotion && promotion.type && promotion.value !== undefined && (
                   <div className="absolute top-3 right-3 z-10">
                     <Badge className="bg-gradient-to-r from-red-500 to-orange-500 text-white border-0 shadow-lg animate-pulse">
@@ -225,13 +275,16 @@ export default function MenuPage() {
                     <Button 
                       size="sm" 
                       className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 group-hover:scale-105 transition-all shadow-md"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleAddToCart(item, 1);
+                      }}
                     >
                       Add to Order
                     </Button>
                   </div>
                 </CardContent>
               </Card>
-              </Link>
             </ScrollReveal>
           );
         })}
@@ -266,6 +319,17 @@ export default function MenuPage() {
                 className="pl-12 h-12 text-base bg-card/50 backdrop-blur-sm border-2 focus:border-primary"
               />
             </div>
+          </ScrollReveal>
+
+          {/* Category Pills - Mobile Optimized */}
+          <ScrollReveal direction="up" delay={0.1} className="mb-8">
+            <CategoryPills
+              categories={categories}
+              selectedCategory={selectedCategory}
+              onCategoryChange={(categoryId) => {
+                setSelectedCategory(categoryId);
+              }}
+            />
           </ScrollReveal>
 
           <ScrollReveal direction="up" delay={0.2} className="flex flex-wrap justify-center gap-3 mb-10">
@@ -309,7 +373,7 @@ export default function MenuPage() {
             </div>
           ) : (
             <Tabs defaultValue="all" className="w-full">
-              <div className="flex justify-center mb-8">
+              <div className="flex justify-center mb-8 hidden md:block">
                 <TabsList className="bg-card/50 backdrop-blur-sm p-1.5 shadow-lg border">
                   <TabsTrigger 
                     value="all" 
@@ -342,6 +406,22 @@ export default function MenuPage() {
           )}
         </div>
       </main>
+
+      {/* Full Screen Item Preview Modal */}
+      <FullScreenItemPreview
+        item={selectedItem}
+        isOpen={isPreviewOpen}
+        onClose={() => setIsPreviewOpen(false)}
+        onAddToCart={handleAddToCart}
+        promotion={selectedItem ? getItemPromotion(selectedItem.id) : null}
+        calculateDiscountedPrice={calculateDiscountedPrice}
+      />
+
+      {/* Sticky Cart Bar - Mobile Only */}
+      <StickyCartBar
+        cartCount={cartItems.reduce((sum, ci) => sum + ci.quantity, 0)}
+        cartTotal={cartTotal}
+      />
       
       <Footer />
     </div>
