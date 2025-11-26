@@ -21,12 +21,12 @@ import { useActivePromotions } from '@/hooks/usePromotions';
 import { useSettings } from '@/hooks/useSettings';
 import { initializeMockData } from '@/lib/firestore-service';
 import { formatCurrency } from '@/lib/utils';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function Home() {
-  const heroImage = PlaceHolderImages.find((img) => img.id === 'hero-cafe');
-  const { items: menuItems, loading } = useMenuItems();
+  const { items: menuItems, loading: menuLoading } = useMenuItems();
   const { promotions: activePromotions } = useActivePromotions();
-  const { settings } = useSettings();
+  const { settings, loading: settingsLoading } = useSettings();
   const featuredItems = menuItems.filter(item => item.tags.includes('new' as any) || item.tags.includes('veg' as any)).slice(0, 3);
   const now = new Date();
   const topPromotion = activePromotions.find(p => 
@@ -37,6 +37,9 @@ export default function Home() {
     new Date(p.endDate) >= now
   );
 
+  const heroImage = PlaceHolderImages.find((img) => img.id === 'hero-cafe');
+  const heroImageUrl = settings.heroImageUrl || heroImage?.imageUrl || '';
+
   useEffect(() => {
     initializeMockData();
   }, []);
@@ -45,16 +48,25 @@ export default function Home() {
     <div className="flex flex-col min-h-screen bg-gradient-to-b from-background via-background to-muted/20">
       <Header />
       <main className="flex-1">
-        <VideoHero fallbackImage={heroImage?.imageUrl || ''}>
+        <VideoHero fallbackImage={heroImageUrl}>
           <div className="h-full flex flex-col items-center justify-center text-center p-4">
             <DynamicGreeting />
             
-            <h1 className="text-5xl md:text-7xl lg:text-8xl font-headline font-bold tracking-tight drop-shadow-2xl animate-slide-down bg-gradient-to-r from-white via-amber-50 to-white bg-clip-text">
-              Cafe Central Station
-            </h1>
-            <p className="mt-6 max-w-3xl text-xl md:text-2xl text-stone-50 drop-shadow-lg animate-fade-in font-medium">
-              Where every cup tells a story and every bite feels like home.
-            </p>
+            {settingsLoading ? (
+              <>
+                <Skeleton className="h-20 w-3/4 max-w-4xl mb-6" />
+                <Skeleton className="h-8 w-1/2 max-w-2xl" />
+              </>
+            ) : (
+              <>
+                <h1 className="text-5xl md:text-7xl lg:text-8xl font-headline font-bold tracking-tight drop-shadow-2xl animate-slide-down bg-gradient-to-r from-white via-amber-50 to-white bg-clip-text">
+                  {settings.name}
+                </h1>
+                <p className="mt-6 max-w-3xl text-xl md:text-2xl text-stone-50 drop-shadow-lg animate-fade-in font-medium">
+                  {settings.description}
+                </p>
+              </>
+            )}
             
             {topPromotion && (
               <ScrollReveal direction="up" delay={0.2} className="mt-8">
@@ -83,18 +95,28 @@ export default function Home() {
             </div>
 
             <div className="mt-12 flex flex-wrap items-center justify-center gap-6 text-sm text-white/90 animate-slide-up backdrop-blur-sm bg-black/20 px-6 py-3 rounded-full">
-              <div className="flex items-center gap-2">
-                <Clock className="h-4 w-4" />
-                <span>Open {settings?.hours?.open || '7am'} - {settings?.hours?.close || '9pm'} Daily</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <MapPin className="h-4 w-4" />
-                <span>{settings?.address?.split('\n')[0] || '123 Central Street'}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Phone className="h-4 w-4" />
-                <span>{settings?.phone || '(555) 123-4567'}</span>
-              </div>
+              {settingsLoading ? (
+                <>
+                   <Skeleton className="h-5 w-48" />
+                   <Skeleton className="h-5 w-48" />
+                   <Skeleton className="h-5 w-32" />
+                </>
+              ) : (
+                <>
+                  <div className="flex items-center gap-2">
+                    <Clock className="h-4 w-4" />
+                    <span>Open {settings.hours.open} - {settings.hours.close} Daily</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <MapPin className="h-4 w-4" />
+                    <span>{settings.address.split('\n')[0]}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Phone className="h-4 w-4" />
+                    <span>{settings.phone}</span>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </VideoHero>
@@ -116,7 +138,7 @@ export default function Home() {
               </p>
             </ScrollReveal>
 
-            {loading ? (
+            {menuLoading ? (
               <div className="flex justify-center items-center h-96">
                 <div className="text-center">
                   <div className="relative">

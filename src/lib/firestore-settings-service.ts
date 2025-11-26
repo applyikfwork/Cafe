@@ -1,5 +1,5 @@
 import { db } from './firebase';
-import { doc, getDoc, setDoc, updateDoc, onSnapshot, Timestamp } from 'firebase/firestore';
+import { doc, getDoc, setDoc, onSnapshot, Timestamp } from 'firebase/firestore';
 
 export interface CafeSettings {
   id: string;
@@ -17,6 +17,7 @@ export interface CafeSettings {
     instagram?: string;
     facebook?: string;
   };
+  heroImageUrl?: string;
   updatedAt: Timestamp;
 }
 
@@ -37,6 +38,7 @@ export const DEFAULT_SETTINGS: Omit<CafeSettings, 'updatedAt'> = {
     instagram: 'https://instagram.com',
     facebook: 'https://facebook.com',
   },
+  heroImageUrl: 'https://images.unsplash.com/photo-1579341560277-4dfaddaf6e98?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxjYWZlJTIwaW50ZXJpb3J8ZW58MHx8fHwxNzYzOTgwNzE1fDA&ixlib=rb-4.1.0&q=80&w=1080',
 };
 
 export async function initializeSettings() {
@@ -103,7 +105,9 @@ export function subscribeToSettings(callback: (settings: CafeSettings) => void):
       callback(DEFAULT_SETTINGS as CafeSettings);
       return () => {};
     }
+    initializeSettings(); // Ensure settings are initialized if they don't exist
     const settingsRef = doc(db, 'settings', SETTINGS_DOC);
+    
     const unsubscribe = onSnapshot(
       settingsRef,
       (docSnap) => {

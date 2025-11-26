@@ -23,6 +23,7 @@ const settingsSchema = z.object({
   address: z.string().min(5),
   hoursOpen: z.string(),
   hoursClose: z.string(),
+  heroImageUrl: z.string().url().optional().or(z.literal('')),
   twitterUrl: z.string().url().optional().or(z.literal('')),
   instagramUrl: z.string().url().optional().or(z.literal('')),
   facebookUrl: z.string().url().optional().or(z.literal('')),
@@ -38,21 +39,22 @@ export default function AdminSettingsPage() {
   const form = useForm<SettingsFormValues>({
     resolver: zodResolver(settingsSchema),
     defaultValues: {
-      name: settings.name,
-      description: settings.description,
-      phone: settings.phone,
-      email: settings.email,
-      address: settings.address,
-      hoursOpen: settings.hours.open,
-      hoursClose: settings.hours.close,
-      twitterUrl: settings.socials.twitter,
-      instagramUrl: settings.socials.instagram,
-      facebookUrl: settings.socials.facebook,
+      name: '',
+      description: '',
+      phone: '',
+      email: '',
+      address: '',
+      hoursOpen: '',
+      hoursClose: '',
+      heroImageUrl: '',
+      twitterUrl: '',
+      instagramUrl: '',
+      facebookUrl: '',
     },
   });
 
   useEffect(() => {
-    if (!loading) {
+    if (settings) {
       form.reset({
         name: settings.name,
         description: settings.description,
@@ -61,12 +63,13 @@ export default function AdminSettingsPage() {
         address: settings.address,
         hoursOpen: settings.hours.open,
         hoursClose: settings.hours.close,
+        heroImageUrl: settings.heroImageUrl || '',
         twitterUrl: settings.socials.twitter,
         instagramUrl: settings.socials.instagram,
         facebookUrl: settings.socials.facebook,
       });
     }
-  }, [settings, loading, form]);
+  }, [settings, form]);
 
   async function onSubmit(values: SettingsFormValues) {
     setIsSaving(true);
@@ -81,6 +84,7 @@ export default function AdminSettingsPage() {
           open: values.hoursOpen,
           close: values.hoursClose,
         },
+        heroImageUrl: values.heroImageUrl,
         socials: {
           twitter: values.twitterUrl,
           instagram: values.instagramUrl,
@@ -153,7 +157,24 @@ export default function AdminSettingsPage() {
                     <FormControl>
                       <Textarea {...field} />
                     </FormControl>
-                    <FormDescription>A short tagline for your cafe</FormDescription>
+                    <FormDescription>A short tagline for your cafe that appears on the homepage.</FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="heroImageUrl"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Homepage Hero Image URL</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="https://images.unsplash.com/..." />
+                    </FormControl>
+                    <FormDescription>
+                      URL for the main image on the homepage. Recommended aspect ratio is 16:9.
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
