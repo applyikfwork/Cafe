@@ -25,6 +25,11 @@ import { initializeMockData } from '@/lib/firestore-service';
 import { formatCurrency } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import { format } from 'date-fns';
+import { FeaturedCarousel } from '@/components/home/featured-carousel';
+import { TestimonialsSection } from '@/components/home/testimonials-section';
+import { StatsSection } from '@/components/home/stats-section';
+import { CTASection } from '@/components/home/cta-section';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 export default function Home() {
   const [mounted, setMounted] = useState(false);
@@ -32,6 +37,7 @@ export default function Home() {
   const { promotions: activePromotions } = useActivePromotions();
   const { settings, loading: settingsLoading } = useSettings();
   const { special } = useTodaysSpecial();
+  const isMobile = useIsMobile();
   
   useEffect(() => {
     setMounted(true);
@@ -64,65 +70,65 @@ export default function Home() {
             
             {settingsLoading ? (
               <>
-                <Skeleton className="h-20 w-3/4 max-w-4xl mb-6" />
-                <Skeleton className="h-8 w-1/2 max-w-2xl" />
+                <Skeleton className="h-16 sm:h-20 w-3/4 max-w-4xl mb-4 sm:mb-6" />
+                <Skeleton className="h-6 sm:h-8 w-2/3 max-w-2xl" />
               </>
             ) : (
               <>
-                <h1 className="text-5xl md:text-7xl lg:text-8xl font-headline font-bold tracking-tight drop-shadow-2xl animate-slide-down bg-gradient-to-r from-white via-amber-50 to-white bg-clip-text text-transparent">
+                <h1 className="text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-headline font-bold tracking-tight drop-shadow-2xl animate-slide-down bg-gradient-to-r from-white via-amber-50 to-white bg-clip-text text-transparent">
                   {settings.name}
                 </h1>
-                <p className="mt-6 max-w-3xl text-xl md:text-2xl text-stone-50 drop-shadow-lg animate-fade-in font-medium">
+                <p className="mt-3 sm:mt-6 max-w-3xl text-base sm:text-lg md:text-2xl text-stone-50 drop-shadow-lg animate-fade-in font-medium">
                   {settings.description}
                 </p>
               </>
             )}
             
             {topPromotion && (
-              <ScrollReveal direction="up" delay={0.2} className="mt-8">
-                <Card className="bg-gradient-to-r from-orange-500 to-red-500 border-0 shadow-2xl text-white max-w-md">
+              <ScrollReveal direction="up" delay={0.2} className="mt-6 sm:mt-8 w-full max-w-md px-2">
+                <Card className="bg-gradient-to-r from-orange-500 to-red-500 border-0 shadow-2xl text-white">
                   <CardContent className="p-4 text-center">
-                    <div className="flex items-center justify-center gap-2 mb-2">
-                      <TrendingUp className="h-5 w-5" />
-                      <span className="font-bold text-lg">Limited Time Offer!</span>
+                    <div className="flex items-center justify-center gap-2 mb-2 text-sm sm:text-base">
+                      <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5" />
+                      <span className="font-bold">Limited Time!</span>
                     </div>
-                    <p className="text-2xl font-bold">{topPromotion.title}</p>
-                    <p className="text-white/90 mt-1">{topPromotion.description}</p>
+                    <p className="text-lg sm:text-2xl font-bold">{topPromotion.title}</p>
+                    <p className="text-white/90 mt-1 text-sm sm:text-base">{topPromotion.description}</p>
                   </CardContent>
                 </Card>
               </ScrollReveal>
             )}
             
-            <div className="mt-10 flex flex-col sm:flex-row gap-4">
-              <AnimatedButton href="/menu" variant="primary" size="lg">
-                <Coffee className="mr-2 h-5 w-5" />
+            <div className="mt-6 sm:mt-10 flex flex-col w-full sm:flex-row gap-3 sm:gap-4 px-4 sm:px-0">
+              <AnimatedButton href="/menu" variant="primary" size={isMobile ? "default" : "lg"} className="w-full sm:w-auto">
+                <Coffee className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
                 Order Now
               </AnimatedButton>
-              <AnimatedButton href="#" variant="secondary" size="lg">
-                <UtensilsCrossed className="mr-2 h-5 w-5" />
+              <AnimatedButton href="#" variant="secondary" size={isMobile ? "default" : "lg"} className="w-full sm:w-auto">
+                <UtensilsCrossed className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
                 Reserve a Table
               </AnimatedButton>
             </div>
 
-            <div className="mt-12 flex flex-wrap items-center justify-center gap-6 text-sm text-white/90 animate-slide-up backdrop-blur-sm bg-black/20 px-6 py-3 rounded-full">
+            <div className="mt-8 sm:mt-12 flex flex-col sm:flex-row flex-wrap items-center justify-center gap-3 sm:gap-6 text-xs sm:text-sm text-white/90 animate-slide-up backdrop-blur-sm bg-black/20 px-4 sm:px-6 py-3 rounded-full">
               {settingsLoading ? (
                 <>
-                   <Skeleton className="h-5 w-48" />
-                   <Skeleton className="h-5 w-48" />
-                   <Skeleton className="h-5 w-32" />
+                   <Skeleton className="h-4 w-32" />
+                   <Skeleton className="h-4 w-32" />
+                   <Skeleton className="h-4 w-24" />
                 </>
               ) : (
                 <>
                   <div className="flex items-center gap-2">
-                    <Clock className="h-4 w-4" />
-                    <span>Open {settings.hours.open} - {settings.hours.close} Daily</span>
+                    <Clock className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                    <span className="text-center">Open {settings.hours.open} - {settings.hours.close}</span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <MapPin className="h-4 w-4" />
+                  <div className="hidden sm:flex items-center gap-2">
+                    <MapPin className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
                     <span>{settings.address.split('\n')[0]}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Phone className="h-4 w-4" />
+                    <Phone className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
                     <span>{settings.phone}</span>
                   </div>
                 </>
@@ -221,8 +227,12 @@ export default function Home() {
                 </div>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-                {featuredItems.map((item, index) => {
+              <div className="max-w-6xl mx-auto">
+                {isMobile ? (
+                  <FeaturedCarousel items={featuredItems} />
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    {featuredItems.map((item, index) => {
                   const itemImage = PlaceHolderImages.find((img) => img.id === item.imageId);
                   return (
                     <ScrollReveal key={item.id} direction="up" delay={index * 0.15}>
