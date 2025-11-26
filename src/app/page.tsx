@@ -188,7 +188,7 @@ export default function Home() {
                           </p>
                           <div className="flex justify-between items-center mt-6 pt-4 border-t">
                             <p className="text-3xl font-bold bg-gradient-to-r from-primary to-orange-500 bg-clip-text text-transparent">
-                              {formatCurrency(item.price)}
+                              <span className="currency-symbol">₹</span>{new Intl.NumberFormat('en-IN').format(item.price)}
                             </p>
                             <Button 
                               variant="outline" 
