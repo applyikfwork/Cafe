@@ -210,15 +210,15 @@ export default function MenuPage() {
                       {discountedPrice !== null ? (
                         <>
                           <span className="text-sm text-muted-foreground line-through">
-                            {formatCurrency(item.price)}
+                            <span className="currency-symbol">₹</span>{new Intl.NumberFormat('en-IN').format(item.price)}
                           </span>
                           <span className="text-2xl font-bold bg-gradient-to-r from-primary to-orange-500 bg-clip-text text-transparent">
-                            {formatCurrency(discountedPrice)}
+                            <span className="currency-symbol">₹</span>{new Intl.NumberFormat('en-IN').format(discountedPrice)}
                           </span>
                         </>
                       ) : (
                         <span className="text-2xl font-bold text-primary">
-                          {formatCurrency(item.price)}
+                          <span className="currency-symbol">₹</span>{new Intl.NumberFormat('en-IN').format(item.price)}
                         </span>
                       )}
                     </div>

@@ -94,3 +94,9 @@ h1, h2, h3, h4, h5, h6 {
     @apply bg-background text-foreground;
   }
 }
+
+/* Currency symbol styling for better Rupee rendering */
+.currency-symbol {
+  font-family: 'Noto Sans', 'Segoe UI', system-ui, sans-serif;
+  font-weight: 600;
+}

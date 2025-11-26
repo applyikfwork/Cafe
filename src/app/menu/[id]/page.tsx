@@ -177,15 +177,15 @@ function MenuItemContent() {
                     {discountedPrice ? (
                       <>
                         <span className="text-4xl font-bold bg-gradient-to-r from-primary to-orange-500 bg-clip-text text-transparent">
-                          {formatCurrency(discountedPrice)}
+                          <span className="currency-symbol">₹</span>{new Intl.NumberFormat('en-IN').format(discountedPrice)}
                         </span>
                         <span className="text-2xl text-muted-foreground line-through">
-                          {formatCurrency(currentItem.price)}
+                          <span className="currency-symbol">₹</span>{new Intl.NumberFormat('en-IN').format(currentItem.price)}
                         </span>
                       </>
                     ) : (
                       <span className="text-4xl font-bold text-primary">
-                        {formatCurrency(currentItem.price)}
+                        <span className="currency-symbol">₹</span>{new Intl.NumberFormat('en-IN').format(currentItem.price)}
                       </span>
                     )}
                   </div>
@@ -216,7 +216,7 @@ function MenuItemContent() {
                         <CardContent className="p-4">
                           <h3 className="font-bold text-lg mb-2 line-clamp-1">{item.name}</h3>
                           <p className="text-muted-foreground text-sm line-clamp-2 mb-3">{item.description}</p>
-                          <p className="text-2xl font-bold text-primary">{formatCurrency(item.price)}</p>
+                          <p className="text-2xl font-bold text-primary"><span className="currency-symbol">₹</span>{new Intl.NumberFormat('en-IN').format(item.price)}</p>
                         </CardContent>
                       </Card>
                     </ScrollReveal>
