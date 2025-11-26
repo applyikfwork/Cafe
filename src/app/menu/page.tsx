@@ -18,9 +18,9 @@ import { Badge } from '@/components/ui/badge';
 import type { Tag } from '@/types';
 import { useMenuItems } from '@/hooks/useMenuItems';
 import { useActivePromotions } from '@/hooks/usePromotions';
+import { useCategories } from '@/hooks/use-categories';
 import { initializeMockData } from '@/lib/firestore-service';
-import { categories } from '@/lib/data';
-import { Search, Sparkles, TrendingUp, Leaf, Flame, ShieldCheck, Star, ChefHat } from 'lucide-react';
+import { Search, Sparkles, TrendingUp, Leaf, Flame, ShieldCheck, Star, ChefHat, ImageIcon } from 'lucide-react';
 
 const tagColors: Record<Tag, string> = {
   veg: 'border-green-500/80 bg-green-500/10 text-green-700 dark:text-green-400',
@@ -39,6 +39,7 @@ const tagIcons: Record<Tag, any> = {
 export default function MenuPage() {
   const { items: menuItems, loading } = useMenuItems();
   const { promotions: activePromotions } = useActivePromotions();
+  const { categories, loading: categoriesLoading } = useCategories();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
 
@@ -69,7 +70,7 @@ export default function MenuPage() {
       if (new Date(p.startDate) > now || new Date(p.endDate) < now) return false;
       
       const isGlobal = !p.applicableItems || p.applicableItems.length === 0;
-      const isApplicable = isGlobal || p.applicableItems.includes(itemId);
+      const isApplicable = isGlobal || (p.applicableItems && p.applicableItems.includes(itemId));
       
       return isApplicable;
     });
@@ -128,6 +129,8 @@ export default function MenuPage() {
           const promotion = getItemPromotion(item.id);
           const discountedPrice = promotion ? calculateDiscountedPrice(item.price, promotion) : null;
           
+          const hasUploadedImage = item.imageUrl && item.imageUrl.startsWith('http');
+          
           return (
             <ScrollReveal key={item.id} direction="up" delay={index * 0.05}>
               <Card className="group relative flex flex-col h-full hover:shadow-2xl transition-all duration-500 border-2 hover:border-primary/50 overflow-hidden bg-card/50 backdrop-blur-sm">
@@ -136,14 +139,20 @@ export default function MenuPage() {
                     <Badge className="bg-gradient-to-r from-red-500 to-orange-500 text-white border-0 shadow-lg animate-pulse">
                       <TrendingUp className="h-3 w-3 mr-1" />
                       {promotion.type === 'percentage' ? `${promotion.value}% OFF` : 
-                       promotion.type === 'fixed' ? `$${promotion.value} OFF` : 'SPECIAL'}
+                       promotion.type === 'fixed' ? `₹${promotion.value} OFF` : 'SPECIAL'}
                     </Badge>
                   </div>
                 )}
                 
                 <CardHeader className="p-0 relative overflow-hidden">
-                  {itemImage && (
-                    <div className="aspect-[4/3] relative">
+                  <div className="aspect-[4/3] relative">
+                    {hasUploadedImage ? (
+                      <img
+                        src={item.imageUrl}
+                        alt={item.name}
+                        className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 group-hover:rotate-1"
+                      />
+                    ) : itemImage ? (
                       <Image
                         src={itemImage.imageUrl}
                         alt={item.name}
@@ -152,18 +161,22 @@ export default function MenuPage() {
                         className="object-cover transition-all duration-700 group-hover:scale-110 group-hover:rotate-1"
                         data-ai-hint={itemImage.imageHint}
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-500" />
-                      
-                      {item.tags.includes('new' as Tag) && (
-                        <div className="absolute top-3 left-3 z-10">
-                          <Badge className="bg-gradient-to-r from-yellow-500 to-amber-500 text-white border-0 shadow-lg">
-                            <Star className="h-3 w-3 mr-1" />
-                            NEW
-                          </Badge>
-                        </div>
-                      )}
-                    </div>
-                  )}
+                    ) : (
+                      <div className="w-full h-full bg-muted flex items-center justify-center">
+                        <ImageIcon className="h-16 w-16 text-muted-foreground/30" />
+                      </div>
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-500" />
+                    
+                    {item.tags.includes('new' as Tag) && (
+                      <div className="absolute top-3 left-3 z-10">
+                        <Badge className="bg-gradient-to-r from-yellow-500 to-amber-500 text-white border-0 shadow-lg">
+                          <Star className="h-3 w-3 mr-1" />
+                          NEW
+                        </Badge>
+                      </div>
+                    )}
+                  </div>
                 </CardHeader>
                 
                 <CardContent className="p-5 flex flex-col flex-1">
@@ -281,7 +294,7 @@ export default function MenuPage() {
             )}
           </ScrollReveal>
 
-          {loading ? (
+          {loading || categoriesLoading ? (
             <div className="flex justify-center items-center h-96">
               <div className="text-center">
                 <div className="relative">

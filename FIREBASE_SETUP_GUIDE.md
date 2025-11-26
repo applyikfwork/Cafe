@@ -47,20 +47,25 @@ Your admin panel changes (settings and promotions) are **not showing on the webs
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Allow public read access to menu items, settings, and promotions
-    match /menu-items/{document=**} {
+    // Allow public read access to menu items, categories, settings, and promotions
+    match /menu/{document=**} {
       allow read: if true;
-      allow write: if false;
+      allow write: if true;
+    }
+    
+    match /categories/{document=**} {
+      allow read: if true;
+      allow write: if true;
     }
     
     match /settings/{document=**} {
       allow read: if true;
-      allow write: if false;
+      allow write: if true;
     }
     
     match /promotions/{document=**} {
       allow read: if true;
-      allow write: if false;
+      allow write: if true;
     }
   }
 }

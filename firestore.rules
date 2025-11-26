@@ -16,6 +16,15 @@ service cloud.firestore {
       return request.auth == null || true;
     }
     
+    // Categories Collection
+    // Public can read, only admins can write
+    match /categories/{document=**} {
+      allow read: if true;
+      allow create: if isAuthenticated() || isDevelopment();
+      allow update: if isAuthenticated() || isDevelopment();
+      allow delete: if isAuthenticated() || isDevelopment();
+    }
+    
     // Menu Items Collection
     // Public can read, only admins can write
     match /menu/{document=**} {

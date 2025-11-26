@@ -2,8 +2,8 @@
 
 export const dynamic = 'force-dynamic';
 
-import { useEffect, useState } from 'react';
-import { PlusCircle, Trash2, Edit } from 'lucide-react';
+import { useState } from 'react';
+import { PlusCircle, Trash2, Edit, ImageIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -24,11 +24,12 @@ import { Badge } from '@/components/ui/badge';
 import { formatCurrency } from '@/lib/utils';
 import { MenuFormSheet } from './components/menu-form-sheet';
 import { useMenuItems } from '@/hooks/useMenuItems';
+import { useCategories } from '@/hooks/use-categories';
 import { deleteMenuItem } from '@/lib/firestore-service';
-import { categories } from '@/lib/data';
 
 export default function AdminMenuPage() {
   const { items: menuItems } = useMenuItems();
+  const { categories } = useCategories();
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
 
   const handleDelete = async (id: string) => {
@@ -71,6 +72,7 @@ export default function AdminMenuPage() {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-16">Image</TableHead>
                 <TableHead>Name</TableHead>
                 <TableHead>Category</TableHead>
                 <TableHead>Price</TableHead>
@@ -83,6 +85,19 @@ export default function AdminMenuPage() {
                 const category = categories.find(c => c.id === item.category);
                 return (
                   <TableRow key={item.id}>
+                    <TableCell>
+                      {item.imageUrl ? (
+                        <img 
+                          src={item.imageUrl} 
+                          alt={item.name}
+                          className="w-12 h-12 object-cover rounded"
+                        />
+                      ) : (
+                        <div className="w-12 h-12 bg-muted rounded flex items-center justify-center">
+                          <ImageIcon className="h-6 w-6 text-muted-foreground" />
+                        </div>
+                      )}
+                    </TableCell>
                     <TableCell className="font-medium">{item.name}</TableCell>
                     <TableCell>{category?.name || 'Uncategorized'}</TableCell>
                     <TableCell>{formatCurrency(item.price)}</TableCell>

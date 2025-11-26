@@ -15,7 +15,8 @@ import {
   PanelLeft,
   Users,
   LogOut,
-  Database
+  Database,
+  FolderOpen
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -30,6 +31,7 @@ import { useToast } from '@/hooks/use-toast';
 const adminNavItems = [
   { href: '/admin', label: 'Dashboard', icon: Home },
   { href: '/admin/menu', label: 'Menu', icon: Book },
+  { href: '/admin/categories', label: 'Categories', icon: FolderOpen },
   { href: '/admin/bookings', label: 'Bookings', icon: Calendar },
   { href: '/admin/orders', label: 'Orders', icon: Receipt },
   { href: '/admin/promotions', label: 'Promotions', icon: Tag },

@@ -3,9 +3,11 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { useTransition } from 'react';
-import { Sparkles } from 'lucide-react';
+import { useState, useTransition, useRef } from 'react';
+import { Sparkles, Upload, X, ImageIcon, Loader2 } from 'lucide-react';
 import { addMenuItem, updateMenuItem } from '@/lib/firestore-service';
+import { uploadMenuImage, formatFileSize, compressImage } from '@/lib/image-utils';
+import { useCategories } from '@/hooks/use-categories';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -28,11 +30,9 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { generateDescriptionAction } from '../actions';
-import { categories } from '@/lib/data';
 import type { MenuItem } from '@/types';
 import { Checkbox } from '@/components/ui/checkbox';
 import { tags as availableTags } from '@/types';
-
 
 const formSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters.'),
@@ -41,7 +41,7 @@ const formSchema = z.object({
   ingredients: z.string().min(3, 'List at least one ingredient.'),
   description: z.string().optional(),
   tags: z.array(z.string()).optional(),
-  imageId: z.string().optional(), // You might want to add a way to select images
+  imageId: z.string().optional(),
 });
 
 type MenuFormValues = z.infer<typeof formSchema>;
@@ -53,8 +53,14 @@ interface MenuFormProps {
 
 export function MenuForm({ menuItem, onFormSubmit }: MenuFormProps) {
   const { toast } = useToast();
+  const { categories, loading: categoriesLoading } = useCategories();
   const [isAiPending, startAiTransition] = useTransition();
   const [isSubmitPending, startSubmitTransition] = useTransition();
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(menuItem?.imageUrl || null);
+  const [isCompressing, setIsCompressing] = useState(false);
+  const [compressedSize, setCompressedSize] = useState<number | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const defaultValues = menuItem ? {
     name: menuItem.name,
@@ -79,6 +85,58 @@ export function MenuForm({ menuItem, onFormSubmit }: MenuFormProps) {
     defaultValues,
   });
 
+  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast({
+        variant: 'destructive',
+        title: 'Invalid file',
+        description: 'Please select an image file.',
+      });
+      return;
+    }
+
+    setSelectedFile(file);
+    setIsCompressing(true);
+
+    try {
+      if (file.size > 900 * 1024) {
+        const compressedBlob = await compressImage(file);
+        setCompressedSize(compressedBlob.size);
+        const url = URL.createObjectURL(compressedBlob);
+        setPreviewUrl(url);
+        toast({
+          title: 'Image compressed',
+          description: `Reduced from ${formatFileSize(file.size)} to ${formatFileSize(compressedBlob.size)}`,
+        });
+      } else {
+        setCompressedSize(file.size);
+        const url = URL.createObjectURL(file);
+        setPreviewUrl(url);
+      }
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Compression failed',
+        description: error instanceof Error ? error.message : 'Failed to compress image',
+      });
+      setSelectedFile(null);
+    } finally {
+      setIsCompressing(false);
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setSelectedFile(null);
+    setPreviewUrl(menuItem?.imageUrl || null);
+    setCompressedSize(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
   const handleGenerateDescription = () => {
     const { name, category, ingredients } = form.getValues();
     
@@ -101,16 +159,38 @@ export function MenuForm({ menuItem, onFormSubmit }: MenuFormProps) {
   };
 
   async function onSubmit(values: MenuFormValues) {
-    const itemData = {
-      ...values,
-      ingredients: values.ingredients.split(',').map(s => s.trim()).filter(Boolean),
-      tags: values.tags || [],
-    };
-    
     startSubmitTransition(async () => {
       try {
+        let imageUrl = menuItem?.imageUrl;
+        const itemId = menuItem?.id || `item-${Date.now()}`;
+
+        if (selectedFile) {
+          toast({
+            title: 'Uploading image...',
+            description: 'Please wait while we upload your image.',
+          });
+          
+          try {
+            imageUrl = await uploadMenuImage(selectedFile, itemId);
+          } catch (uploadError) {
+            toast({
+              variant: 'destructive',
+              title: 'Image upload failed',
+              description: uploadError instanceof Error ? uploadError.message : 'Failed to upload image',
+            });
+            return;
+          }
+        }
+
+        const itemData = {
+          ...values,
+          ingredients: values.ingredients.split(',').map(s => s.trim()).filter(Boolean),
+          tags: (values.tags || []) as ("veg" | "spicy" | "gluten-free" | "new")[],
+          imageUrl,
+        };
+        
         if (menuItem) {
-          await updateMenuItem(menuItem.id, itemData);
+          await updateMenuItem(menuItem.id, itemData as Partial<MenuItem>);
           toast({
             title: 'Menu Item Updated!',
             description: `The item "${values.name}" has been updated successfully.`,
@@ -122,6 +202,9 @@ export function MenuForm({ menuItem, onFormSubmit }: MenuFormProps) {
             description: `The item "${values.name}" has been added successfully.`,
           });
           form.reset();
+          setSelectedFile(null);
+          setPreviewUrl(null);
+          setCompressedSize(null);
         }
         onFormSubmit?.();
       } catch (error) {
@@ -138,6 +221,75 @@ export function MenuForm({ menuItem, onFormSubmit }: MenuFormProps) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 py-6">
+        <div className="space-y-4">
+          <FormLabel>Item Image</FormLabel>
+          <div className="flex flex-col gap-4">
+            {previewUrl ? (
+              <div className="relative w-full h-48 rounded-lg overflow-hidden border bg-muted">
+                <img
+                  src={previewUrl}
+                  alt="Preview"
+                  className="w-full h-full object-cover"
+                />
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="icon"
+                  className="absolute top-2 right-2 h-8 w-8"
+                  onClick={handleRemoveImage}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+                {compressedSize && (
+                  <div className="absolute bottom-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                    {formatFileSize(compressedSize)}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div 
+                className="w-full h-48 rounded-lg border-2 border-dashed border-muted-foreground/25 flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-muted-foreground/50 transition-colors"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                {isCompressing ? (
+                  <>
+                    <Loader2 className="h-10 w-10 text-muted-foreground animate-spin" />
+                    <p className="text-sm text-muted-foreground">Compressing image...</p>
+                  </>
+                ) : (
+                  <>
+                    <ImageIcon className="h-10 w-10 text-muted-foreground" />
+                    <p className="text-sm text-muted-foreground">Click to upload image</p>
+                    <p className="text-xs text-muted-foreground">Images over 900KB will be compressed</p>
+                  </>
+                )}
+              </div>
+            )}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleFileSelect}
+              className="hidden"
+            />
+            {!previewUrl && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isCompressing}
+                className="gap-2"
+              >
+                <Upload className="h-4 w-4" />
+                Select Image
+              </Button>
+            )}
+          </div>
+          <FormDescription>
+            Upload a dish image. Images larger than 900KB will be automatically compressed to fit Firebase free tier limits.
+          </FormDescription>
+        </div>
+
         <FormField
           control={form.control}
           name="name"
@@ -158,7 +310,7 @@ export function MenuForm({ menuItem, onFormSubmit }: MenuFormProps) {
             name="price"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Price</FormLabel>
+                <FormLabel>Price (INR)</FormLabel>
                 <FormControl>
                   <Input type="number" step="0.01" placeholder="0.00" {...field} />
                 </FormControl>
@@ -175,7 +327,7 @@ export function MenuForm({ menuItem, onFormSubmit }: MenuFormProps) {
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select a category" />
+                      <SelectValue placeholder={categoriesLoading ? "Loading..." : "Select a category"} />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -293,8 +445,13 @@ export function MenuForm({ menuItem, onFormSubmit }: MenuFormProps) {
         />
 
         <div className="flex justify-end">
-          <Button type="submit" disabled={isSubmitPending}>
-            {isSubmitPending ? 'Saving...' : 'Save Item'}
+          <Button type="submit" disabled={isSubmitPending || isCompressing}>
+            {isSubmitPending ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                Saving...
+              </>
+            ) : 'Save Item'}
           </Button>
         </div>
       </form>
