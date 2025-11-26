@@ -55,7 +55,6 @@ export function MenuForm({ menuItem, onFormSubmit }: MenuFormProps) {
   const { toast } = useToast();
   const { categories, loading: categoriesLoading } = useCategories();
   const [isAiPending, startAiTransition] = useTransition();
-  const [isSubmitPending, startSubmitTransition] = useTransition();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(menuItem?.imageUrl || null);
   const [isCompressing, setIsCompressing] = useState(false);
@@ -158,64 +157,70 @@ export function MenuForm({ menuItem, onFormSubmit }: MenuFormProps) {
     });
   };
 
+  const [isSaving, setIsSaving] = useState(false);
+
   async function onSubmit(values: MenuFormValues) {
-    startSubmitTransition(async () => {
-      try {
-        let imageUrl = menuItem?.imageUrl;
-        const itemId = menuItem?.id || `item-${Date.now()}`;
+    if (isSaving) return;
+    setIsSaving(true);
+    
+    try {
+      let imageUrl = menuItem?.imageUrl;
+      const itemId = menuItem?.id || `item-${Date.now()}`;
 
-        if (selectedFile) {
-          toast({
-            title: 'Uploading image...',
-            description: 'Please wait while we upload your image.',
-          });
-          
-          try {
-            imageUrl = await uploadMenuImage(selectedFile, itemId);
-          } catch (uploadError) {
-            toast({
-              variant: 'destructive',
-              title: 'Image upload failed',
-              description: uploadError instanceof Error ? uploadError.message : 'Failed to upload image',
-            });
-            return;
-          }
-        }
-
-        const itemData = {
-          ...values,
-          ingredients: values.ingredients.split(',').map(s => s.trim()).filter(Boolean),
-          tags: (values.tags || []) as ("veg" | "spicy" | "gluten-free" | "new")[],
-          imageUrl,
-        };
-        
-        if (menuItem) {
-          await updateMenuItem(menuItem.id, itemData as Partial<MenuItem>);
-          toast({
-            title: 'Menu Item Updated!',
-            description: `The item "${values.name}" has been updated successfully.`,
-          });
-        } else {
-          await addMenuItem(itemData as Omit<MenuItem, 'id'>);
-          toast({
-            title: 'Menu Item Added!',
-            description: `The item "${values.name}" has been added successfully.`,
-          });
-          form.reset();
-          setSelectedFile(null);
-          setPreviewUrl(null);
-          setCompressedSize(null);
-        }
-        onFormSubmit?.();
-      } catch (error) {
-        console.error('Failed to save menu item', error);
+      if (selectedFile) {
         toast({
-          variant: 'destructive',
-          title: 'Save Failed',
-          description: error instanceof Error ? error.message : 'Could not save the menu item.',
+          title: 'Uploading image...',
+          description: 'Please wait while we upload your image.',
         });
+        
+        try {
+          imageUrl = await uploadMenuImage(selectedFile, itemId);
+        } catch (uploadError) {
+          toast({
+            variant: 'destructive',
+            title: 'Image upload failed',
+            description: uploadError instanceof Error ? uploadError.message : 'Failed to upload image',
+          });
+          setIsSaving(false);
+          return;
+        }
       }
-    });
+
+      const itemData = {
+        ...values,
+        ingredients: values.ingredients.split(',').map(s => s.trim()).filter(Boolean),
+        tags: (values.tags || []) as ("veg" | "spicy" | "gluten-free" | "new")[],
+        imageUrl,
+      };
+      
+      if (menuItem) {
+        await updateMenuItem(menuItem.id, itemData as Partial<MenuItem>);
+        toast({
+          title: 'Menu Item Updated!',
+          description: `The item "${values.name}" has been updated successfully.`,
+        });
+      } else {
+        await addMenuItem(itemData as Omit<MenuItem, 'id'>);
+        toast({
+          title: 'Menu Item Added!',
+          description: `The item "${values.name}" has been added successfully.`,
+        });
+        form.reset();
+        setSelectedFile(null);
+        setPreviewUrl(null);
+        setCompressedSize(null);
+      }
+      onFormSubmit?.();
+    } catch (error) {
+      console.error('Failed to save menu item', error);
+      toast({
+        variant: 'destructive',
+        title: 'Save Failed',
+        description: error instanceof Error ? error.message : 'Could not save the menu item.',
+      });
+    } finally {
+      setIsSaving(false);
+    }
   }
 
   return (
@@ -445,8 +450,8 @@ export function MenuForm({ menuItem, onFormSubmit }: MenuFormProps) {
         />
 
         <div className="flex justify-end">
-          <Button type="submit" disabled={isSubmitPending || isCompressing}>
-            {isSubmitPending ? (
+          <Button type="submit" disabled={isSaving || isCompressing}>
+            {isSaving ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
                 Saving...
