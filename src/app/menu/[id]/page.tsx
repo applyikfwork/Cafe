@@ -11,6 +11,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { ScrollReveal } from '@/components/ui/scroll-reveal';
 import { formatCurrency } from '@/lib/utils';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { Price } from '@/components/ui/price';
 import { useMenuItems } from '@/hooks/useMenuItems';
 import { useActivePromotions } from '@/hooks/usePromotions';
 import { ArrowLeft, Star, Leaf, Flame, ShieldCheck, TrendingUp, ImageIcon } from 'lucide-react';
@@ -176,17 +177,13 @@ function MenuItemContent() {
                   <div className="flex items-baseline gap-4 mb-6">
                     {discountedPrice ? (
                       <>
-                        <span className="text-4xl font-bold bg-gradient-to-r from-primary to-orange-500 bg-clip-text text-transparent">
-                          <span className="currency-symbol">₹</span>{new Intl.NumberFormat('en-IN').format(discountedPrice)}
-                        </span>
+                        <Price amount={discountedPrice} className="text-4xl font-bold bg-gradient-to-r from-primary to-orange-500 bg-clip-text text-transparent" />
                         <span className="text-2xl text-muted-foreground line-through">
-                          <span className="currency-symbol">₹</span>{new Intl.NumberFormat('en-IN').format(currentItem.price)}
+                          <Price amount={currentItem.price} />
                         </span>
                       </>
                     ) : (
-                      <span className="text-4xl font-bold text-primary">
-                        <span className="currency-symbol">₹</span>{new Intl.NumberFormat('en-IN').format(currentItem.price)}
-                      </span>
+                      <Price amount={currentItem.price} className="text-4xl font-bold text-primary" />
                     )}
                   </div>
                   <Button size="lg" className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70">
@@ -216,7 +213,7 @@ function MenuItemContent() {
                         <CardContent className="p-4">
                           <h3 className="font-bold text-lg mb-2 line-clamp-1">{item.name}</h3>
                           <p className="text-muted-foreground text-sm line-clamp-2 mb-3">{item.description}</p>
-                          <p className="text-2xl font-bold text-primary"><span className="currency-symbol">₹</span>{new Intl.NumberFormat('en-IN').format(item.price)}</p>
+                          <Price amount={item.price} className="text-2xl font-bold text-primary" />
                         </CardContent>
                       </Card>
                     </ScrollReveal>

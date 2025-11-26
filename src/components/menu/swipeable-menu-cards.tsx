@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import type { MenuItem, Tag } from '@/types';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { TrendingUp, Star, Flame, Leaf, ShieldCheck } from 'lucide-react';
+import { Price } from '@/components/ui/price';
 
 interface SwipeableMenuCardsProps {
   items: MenuItem[];

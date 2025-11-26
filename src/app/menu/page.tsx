@@ -27,6 +27,7 @@ import { CategoryPills } from '@/components/menu/category-pills';
 import { FullScreenItemPreview } from '@/components/menu/full-screen-item-preview';
 import { StickyCartBar } from '@/components/menu/sticky-cart-bar';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { Price } from '@/components/ui/price';
 
 const tagColors: Record<Tag, string> = {
   veg: 'border-green-500/80 bg-green-500/10 text-green-700 dark:text-green-400',
@@ -260,16 +261,12 @@ export default function MenuPage() {
                       {discountedPrice !== null ? (
                         <>
                           <span className="text-sm text-muted-foreground line-through">
-                            <span className="currency-symbol">₹</span>{new Intl.NumberFormat('en-IN').format(item.price)}
+                            <Price amount={item.price} />
                           </span>
-                          <span className="text-2xl font-bold bg-gradient-to-r from-primary to-orange-500 bg-clip-text text-transparent">
-                            <span className="currency-symbol">₹</span>{new Intl.NumberFormat('en-IN').format(discountedPrice)}
-                          </span>
+                          <Price amount={discountedPrice} className="text-2xl font-bold bg-gradient-to-r from-primary to-orange-500 bg-clip-text text-transparent" />
                         </>
                       ) : (
-                        <span className="text-2xl font-bold text-primary">
-                          <span className="currency-symbol">₹</span>{new Intl.NumberFormat('en-IN').format(item.price)}
-                        </span>
+                        <Price amount={item.price} className="text-2xl font-bold text-primary" />
                       )}
                     </div>
                     <Button 
