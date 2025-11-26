@@ -118,14 +118,25 @@ export async function createPromotion(promotion: Omit<Promotion, 'id' | 'created
     const promotionsCollection = collection(db, 'promotions');
     const newPromotionRef = doc(promotionsCollection);
     
-    await setDoc(newPromotionRef, {
-      ...promotion,
+    const dataToSave: any = {
+      title: promotion.title,
+      description: promotion.description,
+      type: promotion.type,
+      value: promotion.value,
+      active: promotion.active,
       startDate: Timestamp.fromDate(promotion.startDate),
       endDate: Timestamp.fromDate(promotion.endDate),
       usageCount: 0,
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),
-    });
+    };
+    
+    if (promotion.code) dataToSave.code = promotion.code;
+    if (promotion.minPurchase !== undefined && promotion.minPurchase > 0) dataToSave.minPurchase = promotion.minPurchase;
+    if (promotion.usageLimit !== undefined && promotion.usageLimit > 0) dataToSave.usageLimit = promotion.usageLimit;
+    if (promotion.applicableItems && promotion.applicableItems.length > 0) dataToSave.applicableItems = promotion.applicableItems;
+    
+    await setDoc(newPromotionRef, dataToSave);
     
     return newPromotionRef.id;
   } catch (error) {
@@ -176,10 +187,22 @@ export async function updatePromotion(id: string, updates: Partial<Promotion>): 
     }
     
     const updateData: any = {
-      ...updates,
       updatedAt: Timestamp.now(),
     };
     
+    if (updates.title !== undefined) updateData.title = updates.title;
+    if (updates.description !== undefined) updateData.description = updates.description;
+    if (updates.type !== undefined) updateData.type = updates.type;
+    if (updates.value !== undefined) updateData.value = updates.value;
+    if (updates.active !== undefined) updateData.active = updates.active;
+    if (updates.code !== undefined) updateData.code = updates.code;
+    if (updates.minPurchase !== undefined) {
+      if (updates.minPurchase > 0) updateData.minPurchase = updates.minPurchase;
+    }
+    if (updates.usageLimit !== undefined) {
+      if (updates.usageLimit > 0) updateData.usageLimit = updates.usageLimit;
+    }
+    if (updates.applicableItems !== undefined) updateData.applicableItems = updates.applicableItems;
     if (updates.startDate) {
       updateData.startDate = Timestamp.fromDate(updates.startDate);
     }
