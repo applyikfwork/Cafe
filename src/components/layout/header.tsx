@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { cn } from '@/lib/utils';
+import { useSettings } from '@/hooks/useSettings';
 
 const navLinks = [
   { href: '/', label: 'Home' },
@@ -18,6 +19,7 @@ const navLinks = [
 
 export function Header() {
   const [isOpen, setIsOpen] = useState(false);
+  const { settings } = useSettings();
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -26,7 +28,7 @@ export function Header() {
           <Link href="/" className="mr-6 flex items-center space-x-2">
             <UtensilsCrossed className="h-6 w-6 text-primary" />
             <span className="hidden font-bold sm:inline-block font-headline">
-              Cafe Central Station
+              {settings?.name || 'Cafe Central Station'}
             </span>
           </Link>
           <nav className="flex items-center space-x-6 text-sm font-medium">
@@ -60,7 +62,7 @@ export function Header() {
               onClick={() => setIsOpen(false)}
             >
               <UtensilsCrossed className="h-6 w-6 text-primary" />
-              <span className="font-bold font-headline">Cafe Central Station</span>
+              <span className="font-bold font-headline">{settings?.name || 'Cafe Central Station'}</span>
             </Link>
             <div className="my-4 h-[calc(100vh-8rem)] pb-10 pl-6">
               <div className="flex flex-col space-y-3">
