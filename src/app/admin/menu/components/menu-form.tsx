@@ -164,7 +164,7 @@ export function MenuForm({ menuItem, onFormSubmit }: MenuFormProps) {
     setIsSaving(true);
     
     try {
-      let imageUrl = menuItem?.imageUrl || undefined;
+      let imageUrl: string | undefined = menuItem?.imageUrl;
       const itemId = menuItem?.id || `item-${Date.now()}`;
 
       if (selectedFile) {
@@ -191,12 +191,15 @@ export function MenuForm({ menuItem, onFormSubmit }: MenuFormProps) {
         }
       }
 
-      const itemData = {
+      const itemData: any = {
         ...values,
         ingredients: values.ingredients.split(',').map(s => s.trim()).filter(Boolean),
         tags: (values.tags || []) as ("veg" | "spicy" | "gluten-free" | "new")[],
-        imageUrl,
       };
+      
+      if (imageUrl) {
+        itemData.imageUrl = imageUrl;
+      }
       
       if (menuItem) {
         await updateMenuItem(menuItem.id, itemData as Partial<MenuItem>);
