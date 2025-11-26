@@ -5,8 +5,20 @@ import { ThemeProvider } from '@/components/theme-provider';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Cafe Central Station',
-  description: 'The best cafe in town, powered by Firebase and Next.js',
+  title: 'Cafe Central Station | Premium Cafe Menu & Delicious Dishes',
+  description: 'Discover our handcrafted cafe menu with artisan coffee, fresh pastries, and delicious meals. Premium quality ingredients, fast service. Order online now!',
+  keywords: 'cafe menu, coffee shop, pastries, breakfast, lunch, cafe near me, premium cafe',
+  authors: [{ name: 'Cafe Central Station' }],
+  openGraph: {
+    type: 'website',
+    locale: 'en_IN',
+    title: 'Cafe Central Station | Premium Cafe Menu',
+    description: 'Discover our handcrafted cafe menu with artisan coffee, fresh pastries, and delicious meals.',
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({

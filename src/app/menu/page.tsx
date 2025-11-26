@@ -21,6 +21,7 @@ import { useActivePromotions } from '@/hooks/usePromotions';
 import { useCategories } from '@/hooks/use-categories';
 import { initializeMockData } from '@/lib/firestore-service';
 import { Search, Sparkles, TrendingUp, Leaf, Flame, ShieldCheck, Star, ChefHat, ImageIcon } from 'lucide-react';
+import Link from 'next/link';
 
 const tagColors: Record<Tag, string> = {
   veg: 'border-green-500/80 bg-green-500/10 text-green-700 dark:text-green-400',
@@ -133,7 +134,8 @@ export default function MenuPage() {
           
           return (
             <ScrollReveal key={item.id} direction="up" delay={index * 0.05}>
-              <Card className="group relative flex flex-col h-full hover:shadow-2xl transition-all duration-500 border-2 hover:border-primary/50 overflow-hidden bg-card/50 backdrop-blur-sm">
+              <Link href={`/menu/${item.id}`}>
+              <Card className="group relative flex flex-col h-full hover:shadow-2xl transition-all duration-500 border-2 hover:border-primary/50 overflow-hidden bg-card/50 backdrop-blur-sm cursor-pointer">
                 {promotion && promotion.type && promotion.value !== undefined && (
                   <div className="absolute top-3 right-3 z-10">
                     <Badge className="bg-gradient-to-r from-red-500 to-orange-500 text-white border-0 shadow-lg animate-pulse">
@@ -229,6 +231,7 @@ export default function MenuPage() {
                   </div>
                 </CardContent>
               </Card>
+              </Link>
             </ScrollReveal>
           );
         })}
