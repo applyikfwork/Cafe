@@ -92,20 +92,34 @@ function canvasToBlob(canvas: HTMLCanvasElement, type: string, quality: number):
 }
 
 export async function uploadMenuImage(file: File, itemId: string): Promise<string> {
+  console.log('uploadMenuImage called with:', { 
+    fileName: file.name, 
+    fileSize: file.size, 
+    fileType: file.type,
+    itemId 
+  });
+
   if (!storage) {
-    throw new Error('Firebase Storage is not initialized. Please configure Firebase.');
+    console.error('Firebase Storage is not initialized');
+    throw new Error('Firebase Storage is not initialized. Please check your Firebase configuration.');
   }
+
+  console.log('Firebase Storage is initialized');
 
   let imageBlob: Blob;
   
   try {
     if (file.size > MAX_FILE_SIZE) {
+      console.log('File is too large, compressing...');
       imageBlob = await compressImage(file);
+      console.log('Image compressed successfully. New size:', imageBlob.size);
     } else {
+      console.log('File size is acceptable, using original');
       imageBlob = file;
     }
   } catch (compressionError) {
     console.error('Image compression failed:', compressionError);
+    console.log('Using original file despite compression failure');
     imageBlob = file;
   }
 
@@ -113,15 +127,33 @@ export async function uploadMenuImage(file: File, itemId: string): Promise<strin
   const extension = file.type === 'image/png' ? 'jpg' : file.name.split('.').pop() || 'jpg';
   const fileName = `menu-images/${itemId}_${timestamp}.${extension}`;
   
+  console.log('Uploading to Firebase Storage with path:', fileName);
+  
   try {
     const storageRef = ref(storage, fileName);
-    await uploadBytes(storageRef, imageBlob);
+    console.log('Storage reference created, uploading bytes...');
+    
+    const uploadResult = await uploadBytes(storageRef, imageBlob);
+    console.log('Upload successful, getting download URL...');
     
     const downloadUrl = await getDownloadURL(storageRef);
+    console.log('Download URL obtained:', downloadUrl);
+    
     return downloadUrl;
-  } catch (uploadError) {
+  } catch (uploadError: any) {
     console.error('Firebase upload error:', uploadError);
-    throw new Error('Failed to upload image to storage. Please try again.');
+    console.error('Error code:', uploadError?.code);
+    console.error('Error message:', uploadError?.message);
+    
+    if (uploadError?.code === 'storage/unauthorized') {
+      throw new Error('You do not have permission to upload images. Please check Firebase Storage rules.');
+    } else if (uploadError?.code === 'storage/canceled') {
+      throw new Error('Upload was canceled.');
+    } else if (uploadError?.code === 'storage/unknown') {
+      throw new Error('An unknown error occurred during upload. Please try again.');
+    } else {
+      throw new Error(`Failed to upload image: ${uploadError?.message || 'Unknown error'}`);
+    }
   }
 }
 
