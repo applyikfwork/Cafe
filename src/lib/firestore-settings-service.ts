@@ -18,6 +18,7 @@ export interface CafeSettings {
     facebook?: string;
   };
   heroImageUrl?: string;
+  logoUrl?: string;
   updatedAt: Timestamp;
 }
 
@@ -39,6 +40,7 @@ export const DEFAULT_SETTINGS: Omit<CafeSettings, 'updatedAt'> = {
     facebook: 'https://facebook.com',
   },
   heroImageUrl: 'https://images.unsplash.com/photo-1579341560277-4dfaddaf6e98?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxjYWZlJTIwaW50ZXJpb3J8ZW58MHx8fHwxNzYzOTgwNzE1fDA&ixlib=rb-4.1.0&q=80&w=1080',
+  logoUrl: '',
 };
 
 export async function initializeSettings() {

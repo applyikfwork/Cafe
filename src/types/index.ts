@@ -33,6 +33,7 @@ export interface CafeSettings {
   name: string;
   description: string;
   heroImageUrl?: string;
+  logoUrl?: string;
   hours: { open: string; close: string };
   address: string;
   phone: string;

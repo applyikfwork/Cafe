@@ -27,6 +27,7 @@ const settingsSchema = z.object({
   hoursOpen: z.string(),
   hoursClose: z.string(),
   heroImageUrl: z.string().url().optional().or(z.literal('')),
+  logoUrl: z.string().url().optional().or(z.literal('')),
   twitterUrl: z.string().url().optional().or(z.literal('')),
   instagramUrl: z.string().url().optional().or(z.literal('')),
   facebookUrl: z.string().url().optional().or(z.literal('')),
@@ -40,6 +41,7 @@ export default function AdminSettingsPage() {
   const { toast } = useToast();
   const [isSaving, setIsSaving] = useState(false);
   const [heroImagePreview, setHeroImagePreview] = useState<string>('');
+  const [logoPreview, setLogoPreview] = useState<string>('');
 
   const form = useForm<SettingsFormValues>({
     resolver: zodResolver(settingsSchema),
@@ -52,6 +54,7 @@ export default function AdminSettingsPage() {
       hoursOpen: '',
       hoursClose: '',
       heroImageUrl: '',
+      logoUrl: '',
       twitterUrl: '',
       instagramUrl: '',
       facebookUrl: '',
@@ -69,11 +72,13 @@ export default function AdminSettingsPage() {
         hoursOpen: settings.hours.open,
         hoursClose: settings.hours.close,
         heroImageUrl: settings.heroImageUrl || '',
+        logoUrl: settings.logoUrl || '',
         twitterUrl: settings.socials?.twitter || '',
         instagramUrl: settings.socials?.instagram || '',
         facebookUrl: settings.socials?.facebook || '',
       });
       setHeroImagePreview(settings.heroImageUrl || '');
+      setLogoPreview(settings.logoUrl || '');
     }
   }, [settings, form]);
 
@@ -105,6 +110,41 @@ export default function AdminSettingsPage() {
       toast({
         title: 'Error',
         description: 'Failed to upload hero image.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsSaving(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('upload_preset', 'menu_uploads');
+
+      const response = await fetch('https://api.cloudinary.com/v1_1/dqyrrekte/image/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await response.json();
+      if (data.secure_url) {
+        setLogoPreview(data.secure_url);
+        form.setValue('logoUrl', data.secure_url);
+        toast({
+          title: 'Success!',
+          description: 'Logo uploaded successfully.',
+        });
+      }
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to upload logo.',
         variant: 'destructive',
       });
     } finally {
@@ -152,6 +192,7 @@ export default function AdminSettingsPage() {
           close: values.hoursClose,
         },
         heroImageUrl: values.heroImageUrl,
+        logoUrl: values.logoUrl,
         socials: {
           twitter: values.twitterUrl,
           instagram: values.instagramUrl,
@@ -195,6 +236,43 @@ export default function AdminSettingsPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
+          {/* Logo Section */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <ImageIcon className="h-5 w-5" />
+                Website Logo
+              </CardTitle>
+              <CardDescription>Upload your cafe logo for browser tab (favicon) and branding</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="relative">
+                {logoPreview ? (
+                  <div className="relative w-32 h-32 rounded-lg overflow-hidden bg-muted">
+                    <img src={logoPreview} alt="Logo preview" className="w-full h-full object-contain" />
+                    <div className="absolute inset-0 bg-black/30 flex items-center justify-center hover:bg-black/50 transition-all cursor-pointer group">
+                      <label className="cursor-pointer w-full h-full flex items-center justify-center">
+                        <div className="text-center opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Upload className="h-6 w-6 text-white mx-auto" />
+                          <p className="text-xs text-white mt-1">Change</p>
+                        </div>
+                        <input type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" />
+                      </label>
+                    </div>
+                  </div>
+                ) : (
+                  <label className="border-2 border-dashed rounded-lg p-8 text-center cursor-pointer hover:bg-muted transition-colors block w-32">
+                    <ImageIcon className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                    <p className="text-xs text-muted-foreground mb-1">Click to upload</p>
+                    <p className="text-xs text-muted-foreground">PNG, JPG</p>
+                    <input type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" />
+                  </label>
+                )}
+              </div>
+              <p className="text-xs text-muted-foreground">Square logos work best. Will appear in browser tabs and as your website favicon.</p>
+            </CardContent>
+          </Card>
+
           {/* Hero Image Section */}
           <Card>
             <CardHeader>
