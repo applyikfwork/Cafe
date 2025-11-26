@@ -54,6 +54,10 @@ localPort = 41675
 externalPort = 5000
 
 [[ports]]
+localPort = 43617
+externalPort = 3001
+
+[[ports]]
 localPort = 45083
 externalPort = 3002
 
@@ -66,3 +70,5 @@ build = ["npm", "run", "build"]
 
 [userenv.shared]
 ADMIN_PASSWORD = "admin123"
+NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME = "dqyrrekte"
+NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET = "menu_uploads"

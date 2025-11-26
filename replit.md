@@ -15,13 +15,14 @@ Cafe Central Station is a modern Next.js 15 application designed for cafes, feat
 The application is built with Next.js 15 and TypeScript, utilizing Turbopack for fast development. Styling is managed with Tailwind CSS and Radix UI components, enhanced with Framer Motion for animations. The core architecture includes:
 - **UI/UX**: Features a warm cafe color palette (coffee browns, cream, coral tones), video hero sections, dynamic greetings, scroll-triggered animations, and a responsive, mobile-first design. It includes a dark/light theme toggle.
 - **Admin Dashboard**: Provides comprehensive management for menu items (add, edit, delete), categories, and promotions. It includes AI-powered description generation using Google Genkit and automatic image compression for uploads. Access is secured via simple password protection.
-- **Data Management**: Firebase Firestore is used for real-time data synchronization of menu items, categories, and promotions. Firebase Storage handles image uploads. Mock data initialization is included for quick setup.
+- **Data Management**: Firebase Firestore is used for real-time data synchronization of menu items, categories, and promotions. **Cloudinary** handles image uploads for menu items. Mock data initialization is included for quick setup.
 - **AI Integration**: Google Genkit AI is integrated to generate engaging menu item descriptions.
 - **Real-time Features**: Custom hooks (`useMenuItems`, `usePromotions`) are used for real-time data fetching and updates from Firestore. Pages are client-side rendered to support these real-time subscriptions.
 - **Deployment**: Configured for Replit environment with specific port and host settings, and optimized for Netlify deployments by ensuring build tools are in main dependencies.
 
 ### External Dependencies
-- **Firebase**: Firestore for real-time database, Firebase Storage for image uploads, Firebase Admin for server-side operations.
+- **Firebase**: Firestore for real-time database, Firebase Admin for server-side operations.
+- **Cloudinary**: Cloud-based image upload and hosting service for menu item images.
 - **Google Genkit AI**: Used for generating menu item descriptions.
 - **Next.js**: Core framework.
 - **React**: UI library.
