@@ -140,11 +140,11 @@ export function SwipeableMenuCards({
                       <div>
                         {discountedPrice !== null ? (
                           <div className="flex flex-col">
-                            <span className="text-xs text-muted-foreground line-through">₹{item.price}</span>
-                            <span className="font-bold text-sm text-primary">₹{Math.round(discountedPrice)}</span>
+                            <span className="text-xs text-muted-foreground line-through"><Price amount={item.price} /></span>
+                            <Price amount={Math.round(discountedPrice)} className="font-bold text-sm text-primary" />
                           </div>
                         ) : (
-                          <span className="font-bold text-sm text-primary">₹{item.price}</span>
+                          <Price amount={item.price} className="font-bold text-sm text-primary" />
                         )}
                       </div>
                     </div>

@@ -10,6 +10,7 @@ import type { MenuItem, Tag } from '@/types';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { X, Minus, Plus, Check, TrendingUp, Star, Flame, Leaf, ShieldCheck } from 'lucide-react';
 import { RupeeSymbol } from '@/components/ui/rupee-symbol';
+import { Price } from '@/components/ui/price';
 
 interface FullScreenItemPreviewProps {
   item: MenuItem | null;
@@ -165,20 +166,16 @@ export function FullScreenItemPreview({
                 <div className="flex items-baseline gap-3">
                   {discountedPrice !== null ? (
                     <>
-                      <span className="text-2xl md:text-3xl font-bold text-primary">
-                        ₹{Math.round(discountedPrice)}
-                      </span>
+                      <Price amount={Math.round(discountedPrice)} className="text-2xl md:text-3xl font-bold text-primary" />
                       <span className="text-lg text-muted-foreground line-through">
-                        ₹{item.price}
+                        <Price amount={item.price} />
                       </span>
                       <span className="text-sm font-bold text-green-600 dark:text-green-400 ml-auto">
-                        Save ₹{Math.round(item.price - discountedPrice)}
+                        Save <Price amount={Math.round(item.price - discountedPrice)} />
                       </span>
                     </>
                   ) : (
-                    <span className="text-3xl md:text-4xl font-bold text-primary">
-                      ₹{item.price}
-                    </span>
+                    <Price amount={item.price} className="text-3xl md:text-4xl font-bold text-primary" />
                   )}
                 </div>
               </div>

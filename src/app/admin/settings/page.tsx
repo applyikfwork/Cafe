@@ -17,6 +17,7 @@ import { updateSettings } from '@/lib/firestore-settings-service';
 import { updateTodaysSpecial } from '@/lib/firestore-todays-special-service';
 import { useToast } from '@/hooks/use-toast';
 import { Upload, Coffee, Image as ImageIcon } from 'lucide-react';
+import { Price } from '@/components/ui/price';
 
 const settingsSchema = z.object({
   name: z.string().min(2),

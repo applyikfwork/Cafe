@@ -9,6 +9,7 @@ import type { MenuItem, Tag } from '@/types';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Star, Heart, TrendingUp } from 'lucide-react';
 import { RupeeSymbol } from '@/components/ui/rupee-symbol';
+import { Price } from '@/components/ui/price';
 
 interface FeaturedCarouselProps {
   items: MenuItem[];
@@ -95,7 +96,7 @@ export function FeaturedCarousel({ items, onItemClick }: FeaturedCarouselProps) 
                       {item.description}
                     </p>
                     <div className="flex justify-between items-center">
-                      <span className="font-bold text-lg text-primary"><RupeeSymbol />{item.price}</span>
+                      <Price amount={item.price} className="font-bold text-lg text-primary" />
                       <div className="flex items-center gap-1 bg-orange-500/20 px-2 py-1 rounded-full text-xs font-semibold text-orange-600 dark:text-orange-400">
                         <TrendingUp className="h-3 w-3" />
                         Popular
