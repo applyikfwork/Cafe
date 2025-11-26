@@ -9,6 +9,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import type { MenuItem, Tag } from '@/types';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { X, Minus, Plus, Check, TrendingUp, Star, Flame, Leaf, ShieldCheck } from 'lucide-react';
+import { RupeeSymbol } from '@/components/ui/rupee-symbol';
 
 interface FullScreenItemPreviewProps {
   item: MenuItem | null;

@@ -96,7 +96,11 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* Currency symbol styling for better Rupee rendering */
-.currency-symbol {
-  font-family: 'Noto Sans', 'Segoe UI', system-ui, sans-serif;
+.currency-symbol,
+.rupee-symbol {
+  font-family: 'Noto Sans', 'Noto Sans Devanagari', 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   font-weight: 600;
+  display: inline-block;
+  font-size: inherit;
+  line-height: inherit;
 }
