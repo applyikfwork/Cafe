@@ -65,133 +65,155 @@ export default function Home() {
       <Header />
       <main className="flex-1">
         <VideoHero fallbackImage={heroImageUrl}>
-          <div className="h-full flex flex-col items-center justify-center text-center p-4">
-            <DynamicGreeting />
-            
-            {settingsLoading ? (
-              <>
-                <Skeleton className="h-16 sm:h-20 w-3/4 max-w-4xl mb-4 sm:mb-6" />
-                <Skeleton className="h-6 sm:h-8 w-2/3 max-w-2xl" />
-              </>
-            ) : (
-              <>
-                <h1 className="text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-headline font-bold tracking-tight drop-shadow-2xl animate-slide-down bg-gradient-to-r from-white via-amber-50 to-white bg-clip-text text-transparent">
-                  {settings.name}
-                </h1>
-                <p className="mt-3 sm:mt-6 max-w-3xl text-base sm:text-lg md:text-2xl text-stone-50 drop-shadow-lg animate-fade-in font-medium">
-                  {settings.description}
-                </p>
-              </>
-            )}
-            
-            {topPromotion && (
-              <ScrollReveal direction="up" delay={0.2} className="mt-6 sm:mt-8 w-full max-w-md px-2">
-                <Card className="bg-gradient-to-r from-orange-500 to-red-500 border-0 shadow-2xl text-white">
-                  <CardContent className="p-4 text-center">
-                    <div className="flex items-center justify-center gap-2 mb-2 text-sm sm:text-base">
-                      <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5" />
-                      <span className="font-bold">Limited Time!</span>
-                    </div>
-                    <p className="text-lg sm:text-2xl font-bold">{topPromotion.title}</p>
-                    <p className="text-white/90 mt-1 text-sm sm:text-base">{topPromotion.description}</p>
-                  </CardContent>
-                </Card>
-              </ScrollReveal>
-            )}
-            
-            <div className="mt-6 sm:mt-10 flex flex-col w-full sm:flex-row gap-3 sm:gap-4 px-4 sm:px-0">
-              <AnimatedButton href="/menu" variant="primary" size={isMobile ? "default" : "lg"} className="w-full sm:w-auto">
-                <Coffee className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
-                Order Now
-              </AnimatedButton>
-              <AnimatedButton href="#" variant="secondary" size={isMobile ? "default" : "lg"} className="w-full sm:w-auto">
-                <UtensilsCrossed className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
-                Reserve a Table
-              </AnimatedButton>
-            </div>
-
-            <div className="mt-8 sm:mt-12 flex flex-col sm:flex-row flex-wrap items-center justify-center gap-3 sm:gap-6 text-xs sm:text-sm text-white/90 animate-slide-up backdrop-blur-sm bg-black/20 px-4 sm:px-6 py-3 rounded-full">
+          <div className="h-full flex flex-col items-center justify-center text-center p-4 sm:p-6">
+            <div className="w-full max-w-2xl">
+              {/* Greeting Badge */}
+              <DynamicGreeting />
+              
+              {/* Main Title and Description */}
               {settingsLoading ? (
                 <>
-                   <Skeleton className="h-4 w-32" />
-                   <Skeleton className="h-4 w-32" />
-                   <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-14 sm:h-20 w-3/4 max-w-2xl mb-3 sm:mb-4 mx-auto" />
+                  <Skeleton className="h-5 sm:h-7 w-2/3 max-w-xl mx-auto" />
                 </>
               ) : (
                 <>
-                  <div className="flex items-center gap-2">
-                    <Clock className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
-                    <span className="text-center">Open {settings.hours.open} - {settings.hours.close}</span>
-                  </div>
-                  <div className="hidden sm:flex items-center gap-2">
-                    <MapPin className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
-                    <span>{settings.address.split('\n')[0]}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Phone className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
-                    <span>{settings.phone}</span>
-                  </div>
+                  <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-headline font-black tracking-tighter drop-shadow-2xl animate-slide-down bg-gradient-to-r from-white via-amber-50 to-white bg-clip-text text-transparent leading-tight">
+                    {settings.name}
+                  </h1>
+                  <p className="mt-3 sm:mt-4 max-w-2xl mx-auto text-sm sm:text-lg md:text-xl text-white drop-shadow-lg animate-fade-in font-medium leading-relaxed">
+                    {settings.description}
+                  </p>
                 </>
               )}
+
+              {/* Promotion Badge */}
+              {topPromotion && (
+                <ScrollReveal direction="up" delay={0.2} className="mt-5 sm:mt-6 px-3 sm:px-0">
+                  <div className="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-orange-500/90 to-red-500/90 border-2 border-orange-300/50 rounded-full backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all">
+                    <TrendingUp className="h-4 w-4 flex-shrink-0 text-white animate-pulse" />
+                    <span className="text-sm sm:text-base font-bold text-white">{topPromotion.title}</span>
+                  </div>
+                </ScrollReveal>
+              )}
+              
+              {/* CTA Buttons */}
+              <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row gap-3 items-center justify-center px-2">
+                <AnimatedButton href="/menu" variant="primary" size={isMobile ? "default" : "lg"} className="w-full sm:w-auto px-6 sm:px-8 h-12 sm:h-14 text-base sm:text-lg font-bold shadow-xl hover:shadow-2xl">
+                  <Coffee className="mr-2 h-5 w-5" />
+                  Order Now
+                </AnimatedButton>
+                <AnimatedButton href="#" variant="secondary" size={isMobile ? "default" : "lg"} className="w-full sm:w-auto px-6 sm:px-8 h-12 sm:h-14 text-base sm:text-lg font-bold shadow-lg hover:shadow-xl">
+                  <UtensilsCrossed className="mr-2 h-5 w-5" />
+                  Reserve
+                </AnimatedButton>
+              </div>
+
+              {/* Quick Info */}
+              <div className="mt-6 sm:mt-8 flex flex-col gap-2 text-xs sm:text-sm text-white/95">
+                {settingsLoading ? (
+                  <>
+                    <Skeleton className="h-4 w-40 mx-auto" />
+                    <Skeleton className="h-4 w-40 mx-auto" />
+                  </>
+                ) : (
+                  <>
+                    <div className="flex items-center justify-center gap-2">
+                      <Clock className="h-4 w-4" />
+                      <span className="font-medium">Open {settings.hours.open} - {settings.hours.close}</span>
+                    </div>
+                    <div className="flex items-center justify-center gap-2">
+                      <Phone className="h-4 w-4" />
+                      <span className="font-medium">{settings.phone}</span>
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
           </div>
         </VideoHero>
 
         {topPromotion && (
-          <section className="py-12 md:py-16 bg-gradient-to-r from-red-500/10 via-orange-500/10 to-red-500/10 relative overflow-hidden border-y">
-            <div className="absolute inset-0 opacity-10">
-              <div className="absolute top-0 right-0 w-96 h-96 bg-primary rounded-full mix-blend-multiply filter blur-3xl animate-pulse" />
-              <div className="absolute bottom-0 left-0 w-96 h-96 bg-accent rounded-full mix-blend-multiply filter blur-3xl animate-pulse" />
+          <section className="py-8 sm:py-12 md:py-16 bg-gradient-to-br from-orange-600 via-red-600 to-orange-700 relative overflow-hidden">
+            {/* Animated Background */}
+            <div className="absolute inset-0 opacity-20">
+              <div className="absolute -top-40 -right-40 w-80 h-80 bg-white rounded-full blur-3xl animate-pulse" />
+              <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-orange-300 rounded-full blur-3xl animate-pulse" />
             </div>
+            
             <div className="container mx-auto px-4 relative z-10">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 items-center max-w-5xl mx-auto">
+                {/* Left Content */}
                 <ScrollReveal direction="left">
-                  <div>
-                    <span className="inline-block text-primary font-semibold text-sm md:text-base mb-4 px-4 py-2 bg-primary/10 rounded-full">🎉 LIMITED TIME</span>
-                    <h2 className="text-3xl md:text-5xl font-headline font-bold mb-4">
+                  <div className="text-white">
+                    <div className="inline-flex items-center gap-2 mb-3 sm:mb-4 bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-full border border-white/30">
+                      <Sparkles className="h-4 w-4" />
+                      <span className="text-xs sm:text-sm font-bold">LIMITED TIME OFFER</span>
+                    </div>
+                    
+                    <h2 className="text-3xl sm:text-4xl md:text-5xl font-headline font-black mb-3 sm:mb-4 leading-tight">
                       {topPromotion.title}
                     </h2>
-                    <p className="text-lg md:text-xl text-muted-foreground mb-6 leading-relaxed">
+                    
+                    <p className="text-base sm:text-lg text-white/90 mb-5 sm:mb-6 leading-relaxed">
                       {topPromotion.description}
                     </p>
-                    <div className="flex flex-wrap gap-3 md:gap-4 items-center">
-                      <div className="text-4xl md:text-5xl font-bold text-primary">
-                        {topPromotion.type === 'percentage' ? `${topPromotion.value}%` : 
-                         topPromotion.type === 'fixed' ? `₹${topPromotion.value}` : 'BOGO'}
-                        <span className="text-lg md:text-2xl ml-2 text-muted-foreground">OFF</span>
-                      </div>
-                      <AnimatedButton href="/menu" variant="primary" size="lg">
-                        Claim Now
-                      </AnimatedButton>
-                    </div>
-                  </div>
-                </ScrollReveal>
-                <ScrollReveal direction="right">
-                  <div className="relative">
-                    <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-accent/20 rounded-3xl blur-3xl" />
-                    <Card className="relative bg-gradient-to-br from-primary/5 to-accent/5 border-2 border-primary/20 p-8">
-                      <CardContent className="space-y-6">
+
+                    {/* Discount Badge */}
+                    <div className="mb-6 sm:mb-8">
+                      <div className="inline-block bg-white/95 rounded-2xl px-6 sm:px-8 py-4 shadow-2xl">
                         <div className="text-center">
-                          <div className="text-6xl md:text-7xl font-bold text-primary mb-2">
+                          <div className="text-5xl sm:text-6xl font-black text-orange-600">
                             {topPromotion.type === 'percentage' ? `${topPromotion.value}%` : 
                              topPromotion.type === 'fixed' ? <><span className="currency-symbol">₹</span>{topPromotion.value}</> : 'BOGO'}
                           </div>
-                          <p className="text-xl text-muted-foreground font-semibold">DISCOUNT</p>
+                          <p className="text-xs sm:text-sm font-bold text-gray-600 mt-1">OFF</p>
                         </div>
-                        <div className="bg-white/50 dark:bg-white/10 rounded-xl p-4 text-center">
-                          <p className="text-sm text-muted-foreground mb-2">Valid from</p>
-                          <p className="font-semibold">
-                            {format(new Date(topPromotion.startDate), 'MMM dd')} - {format(new Date(topPromotion.endDate), 'MMM dd')}
-                          </p>
+                      </div>
+                    </div>
+
+                    {/* Details */}
+                    <div className="space-y-3 mb-6">
+                      {topPromotion.code && (
+                        <div className="flex items-center gap-3 bg-white/10 backdrop-blur-sm px-4 py-3 rounded-lg border border-white/20">
+                          <span className="text-sm font-medium text-white/80">Code:</span>
+                          <code className="font-bold text-lg text-white">{topPromotion.code}</code>
                         </div>
-                        {topPromotion.code && (
-                          <div className="bg-primary/10 rounded-xl p-4 text-center">
-                            <p className="text-xs text-muted-foreground mb-1">Use Code</p>
-                            <code className="text-2xl font-bold text-primary">{topPromotion.code}</code>
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
+                      )}
+                      <div className="flex items-center gap-3 bg-white/10 backdrop-blur-sm px-4 py-3 rounded-lg border border-white/20">
+                        <Clock className="h-4 w-4 text-white/80 flex-shrink-0" />
+                        <span className="text-sm font-medium text-white/80">
+                          Valid {format(new Date(topPromotion.startDate), 'MMM dd')} - {format(new Date(topPromotion.endDate), 'MMM dd')}
+                        </span>
+                      </div>
+                    </div>
+
+                    <AnimatedButton href="/menu" variant="primary" size="lg" className="w-full bg-white text-orange-600 hover:bg-white/90 font-bold text-base sm:text-lg h-12 sm:h-14 shadow-xl">
+                      Claim This Offer
+                      <TrendingUp className="ml-2 h-5 w-5" />
+                    </AnimatedButton>
+                  </div>
+                </ScrollReveal>
+
+                {/* Right Visual */}
+                <ScrollReveal direction="right" className="hidden md:block">
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-white/5 rounded-3xl blur-2xl" />
+                    <div className="relative bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-sm border-2 border-white/20 rounded-3xl p-6 sm:p-8 text-white text-center shadow-2xl">
+                      <div className="space-y-4">
+                        <div className="text-sm uppercase tracking-widest font-bold text-white/80">Your Savings</div>
+                        <div className="text-5xl sm:text-6xl font-black">
+                          {topPromotion.type === 'percentage' ? `${topPromotion.value}%` : 
+                           topPromotion.type === 'fixed' ? <><span className="currency-symbol">₹</span>{topPromotion.value}</> : 'BOGO'}
+                        </div>
+                        <div className="h-1 bg-gradient-to-r from-transparent via-white to-transparent rounded-full" />
+                        <p className="text-lg text-white/90 font-semibold">{topPromotion.title}</p>
+                        <div className="text-sm text-white/70 mt-4">
+                          <div className="font-bold mb-2">⏰ Hurry Up!</div>
+                          <div>Offer ends on {format(new Date(topPromotion.endDate), 'MMM dd, yyyy')}</div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </ScrollReveal>
               </div>
