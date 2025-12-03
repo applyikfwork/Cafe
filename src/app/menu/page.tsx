@@ -2,7 +2,7 @@
 
 export const dynamic = 'force-dynamic';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import Image from 'next/image';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
@@ -13,19 +13,26 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollReveal } from '@/components/ui/scroll-reveal';
 import { TodaysSpecialBanner } from '@/components/ui/todays-special-banner';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
-import { formatCurrency } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
-import type { Tag, MenuItem } from '@/types';
+import type { Tag, MenuItem, SortOption, SpiceLevel, DietaryPreference } from '@/types';
 import { useMenuItems } from '@/hooks/useMenuItems';
 import { useActivePromotions } from '@/hooks/usePromotions';
 import { useCategories } from '@/hooks/use-categories';
+import { useMenuFavorites } from '@/hooks/useMenuFavorites';
 import { initializeMockData } from '@/lib/firestore-service';
+import { useToast } from '@/hooks/use-toast';
 import { Search, Sparkles, TrendingUp, Leaf, Flame, ShieldCheck, Star, ChefHat, ImageIcon } from 'lucide-react';
 import Link from 'next/link';
 import { SwipeableMenuCards } from '@/components/menu/swipeable-menu-cards';
 import { CategoryPills } from '@/components/menu/category-pills';
 import { FullScreenItemPreview } from '@/components/menu/full-screen-item-preview';
 import { StickyCartBar } from '@/components/menu/sticky-cart-bar';
+import { SmartFilterBar } from '@/components/menu/smart-filter-bar';
+import { TrendingSection } from '@/components/menu/trending-section';
+import { RecentlyViewedSection } from '@/components/menu/recently-viewed-section';
+import { FavoritesSection } from '@/components/menu/favorites-section';
+import { RecommendedSection } from '@/components/menu/recommended-section';
+import { EnhancedMenuCard } from '@/components/menu/enhanced-menu-card';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Price } from '@/components/ui/price';
 
@@ -47,6 +54,7 @@ export default function MenuPage() {
   const { items: menuItems, loading } = useMenuItems();
   const { promotions: activePromotions } = useActivePromotions();
   const { categories, loading: categoriesLoading } = useCategories();
+  const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -55,18 +63,151 @@ export default function MenuPage() {
   const [cartItems, setCartItems] = useState<Array<{ item: MenuItem; quantity: number }>>([]);
   const isMobile = useIsMobile();
 
+  // Smart filter states
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]);
+  const [selectedDietary, setSelectedDietary] = useState<DietaryPreference[]>([]);
+  const [selectedSpiceLevel, setSelectedSpiceLevel] = useState<SpiceLevel | null>(null);
+  const [sortOption, setSortOption] = useState<SortOption>('popularity');
+
+  // Favorites and Recently Viewed
+  const { 
+    favorites, 
+    recentlyViewed, 
+    toggleFavorite, 
+    isFavorite, 
+    addToRecentlyViewed,
+    clearRecentlyViewed,
+    mounted: favMounted 
+  } = useMenuFavorites();
+
   useEffect(() => {
     initializeMockData();
   }, []);
 
+  // Calculate max price from menu items
+  const maxPrice = useMemo(() => {
+    if (menuItems.length === 0) return 1000;
+    return Math.max(...menuItems.map(item => item.price)) + 100;
+  }, [menuItems]);
+
+  // Initialize price range when items load
+  useEffect(() => {
+    if (menuItems.length > 0 && priceRange[1] === 1000) {
+      setPriceRange([0, maxPrice]);
+    }
+  }, [menuItems, maxPrice, priceRange]);
+
+  // Get trending items (top 5 by order count/popularity)
+  const trendingItems = useMemo(() => {
+    return [...menuItems]
+      .sort((a, b) => (b.orderCount || 0) - (a.orderCount || 0))
+      .slice(0, 5)
+      .map(item => ({ ...item, isTrending: true }));
+  }, [menuItems]);
+
+  // Get favorite items
+  const favoriteItems = useMemo(() => {
+    return menuItems.filter(item => favorites.includes(item.id));
+  }, [menuItems, favorites]);
+
+  // Get recently viewed items
+  const recentlyViewedItems = useMemo(() => {
+    return recentlyViewed
+      .map(id => menuItems.find(item => item.id === id))
+      .filter((item): item is MenuItem => item !== undefined);
+  }, [menuItems, recentlyViewed]);
+
+  // Get recommended items based on favorites and recently viewed categories
+  const recommendedItems = useMemo(() => {
+    const viewedCategories = new Set([
+      ...favoriteItems.map(i => i.category),
+      ...recentlyViewedItems.map(i => i.category)
+    ]);
+    
+    if (viewedCategories.size === 0) {
+      // If no history, return random high-rated items
+      return [...menuItems]
+        .sort((a, b) => (b.rating || 4.5) - (a.rating || 4.5))
+        .slice(0, 6);
+    }
+
+    return menuItems
+      .filter(item => 
+        viewedCategories.has(item.category) && 
+        !favorites.includes(item.id) &&
+        !recentlyViewed.includes(item.id)
+      )
+      .sort((a, b) => (b.rating || 4.5) - (a.rating || 4.5))
+      .slice(0, 6);
+  }, [menuItems, favoriteItems, recentlyViewedItems, favorites, recentlyViewed]);
+
+  // Calculate active filter count
+  const activeFilterCount = useMemo(() => {
+    let count = 0;
+    if (selectedDietary.length > 0) count += selectedDietary.length;
+    if (selectedSpiceLevel) count++;
+    if (priceRange[0] > 0 || priceRange[1] < maxPrice) count++;
+    return count;
+  }, [selectedDietary, selectedSpiceLevel, priceRange, maxPrice]);
+
+  const clearAllFilters = () => {
+    setPriceRange([0, maxPrice]);
+    setSelectedDietary([]);
+    setSelectedSpiceLevel(null);
+    setSelectedTags([]);
+    setSearchQuery('');
+  };
+
   const filterItems = (items: typeof menuItems) => {
     return items.filter((item) => {
+      // Search filter
       const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                           item.description.toLowerCase().includes(searchQuery.toLowerCase());
+      
+      // Tag filter
       const matchesTags = selectedTags.length === 0 || 
                          selectedTags.some(tag => item.tags.includes(tag));
-      return matchesSearch && matchesTags;
+      
+      // Price filter
+      const matchesPrice = item.price >= priceRange[0] && item.price <= priceRange[1];
+      
+      // Dietary filter
+      const matchesDietary = selectedDietary.length === 0 ||
+                            selectedDietary.some(d => 
+                              item.dietary?.includes(d) || 
+                              (d === 'veg' && item.tags.includes('veg')) ||
+                              (d === 'gluten-free' && item.tags.includes('gluten-free'))
+                            );
+      
+      // Spice level filter
+      const matchesSpice = !selectedSpiceLevel || 
+                          item.spiceLevel === selectedSpiceLevel ||
+                          (selectedSpiceLevel && item.tags.includes('spicy'));
+      
+      return matchesSearch && matchesTags && matchesPrice && matchesDietary && matchesSpice;
     });
+  };
+
+  const sortItems = (items: MenuItem[]) => {
+    const sorted = [...items];
+    switch (sortOption) {
+      case 'popularity':
+        return sorted.sort((a, b) => (b.orderCount || 0) - (a.orderCount || 0));
+      case 'rating':
+        return sorted.sort((a, b) => (b.rating || 4.5) - (a.rating || 4.5));
+      case 'price-low':
+        return sorted.sort((a, b) => a.price - b.price);
+      case 'price-high':
+        return sorted.sort((a, b) => b.price - a.price);
+      case 'newest':
+        return sorted.sort((a, b) => {
+          const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+          const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+          return dateB - dateA;
+        });
+      default:
+        return sorted;
+    }
   };
 
   const toggleTag = (tag: Tag) => {
@@ -111,7 +252,7 @@ export default function MenuPage() {
     }
   };
 
-  const handleAddToCart = (item: MenuItem, quantity: number) => {
+  const handleAddToCart = (item: MenuItem, quantity: number = 1) => {
     setCartItems((prev) => {
       const existing = prev.find((ci) => ci.item.id === item.id);
       if (existing) {
@@ -121,6 +262,16 @@ export default function MenuPage() {
       }
       return [...prev, { item, quantity }];
     });
+    toast({
+      title: '✅ Added to Cart!',
+      description: `${quantity}x ${item.name} added successfully`,
+    });
+  };
+
+  const handleItemClick = (item: MenuItem) => {
+    setSelectedItem(item);
+    setIsPreviewOpen(true);
+    addToRecentlyViewed(item.id);
   };
 
   const cartTotal = cartItems.reduce((total, ci) => {
@@ -130,7 +281,7 @@ export default function MenuPage() {
   }, 0);
 
   const renderMenuGrid = (items: typeof menuItems) => {
-    const filteredItems = filterItems(items);
+    const filteredItems = sortItems(filterItems(items));
     
     if (filteredItems.length === 0) {
       return (
@@ -141,10 +292,7 @@ export default function MenuPage() {
           <Button 
             variant="outline" 
             className="mt-4"
-            onClick={() => {
-              setSearchQuery('');
-              setSelectedTags([]);
-            }}
+            onClick={clearAllFilters}
           >
             Clear Filters
           </Button>
@@ -158,10 +306,7 @@ export default function MenuPage() {
         <div className="space-y-4">
           <SwipeableMenuCards
             items={filteredItems}
-            onItemClick={(item) => {
-              setSelectedItem(item);
-              setIsPreviewOpen(true);
-            }}
+            onItemClick={handleItemClick}
             getItemPromotion={getItemPromotion}
             calculateDiscountedPrice={calculateDiscountedPrice}
           />
@@ -172,117 +317,21 @@ export default function MenuPage() {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredItems.map((item, index) => {
-          const itemImage = PlaceHolderImages.find((img) => img.id === item.imageId);
           const promotion = getItemPromotion(item.id);
           const discountedPrice = promotion ? calculateDiscountedPrice(item.price, promotion) : null;
           
-          const hasUploadedImage = item.imageUrl && item.imageUrl.startsWith('http');
-          
           return (
-            <ScrollReveal key={item.id} direction="up" delay={index * 0.05}>
-              <Card 
-                className="group relative flex flex-col h-full hover:shadow-2xl transition-all duration-500 border-2 hover:border-primary/50 overflow-hidden bg-card/50 backdrop-blur-sm cursor-pointer"
-                onClick={() => {
-                  setSelectedItem(item);
-                  setIsPreviewOpen(true);
-                }}
-              >
-                {promotion && promotion.type && promotion.value !== undefined && (
-                  <div className="absolute top-3 right-3 z-10">
-                    <Badge className="bg-gradient-to-r from-red-500 to-orange-500 text-white border-0 shadow-lg animate-pulse">
-                      <TrendingUp className="h-3 w-3 mr-1" />
-                      {promotion.type === 'percentage' ? `${promotion.value}% OFF` : 
-                       promotion.type === 'fixed' ? `₹${promotion.value} OFF` : 'SPECIAL'}
-                    </Badge>
-                  </div>
-                )}
-                
-                <CardHeader className="p-0 relative overflow-hidden">
-                  <div className="aspect-[4/3] relative">
-                    {hasUploadedImage ? (
-                      <img
-                        src={item.imageUrl}
-                        alt={item.name}
-                        className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 group-hover:rotate-1"
-                      />
-                    ) : itemImage ? (
-                      <Image
-                        src={itemImage.imageUrl}
-                        alt={item.name}
-                        fill
-                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                        className="object-cover transition-all duration-700 group-hover:scale-110 group-hover:rotate-1"
-                        data-ai-hint={itemImage.imageHint}
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-muted flex items-center justify-center">
-                        <ImageIcon className="h-16 w-16 text-muted-foreground/30" />
-                      </div>
-                    )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-500" />
-                    
-                    {item.tags.includes('new' as Tag) && (
-                      <div className="absolute top-3 left-3 z-10">
-                        <Badge className="bg-gradient-to-r from-yellow-500 to-amber-500 text-white border-0 shadow-lg">
-                          <Star className="h-3 w-3 mr-1" />
-                          NEW
-                        </Badge>
-                      </div>
-                    )}
-                  </div>
-                </CardHeader>
-                
-                <CardContent className="p-5 flex flex-col flex-1">
-                  <h3 className="font-headline text-xl font-bold mb-2 group-hover:text-primary transition-colors line-clamp-1">
-                    {item.name}
-                  </h3>
-                  <p className="text-muted-foreground text-sm flex-grow leading-relaxed line-clamp-2 mb-3">
-                    {item.description}
-                  </p>
-                
-                  <div className="flex flex-wrap gap-1.5 mb-4">
-                    {item.tags.filter(tag => tag !== 'new').map(tag => {
-                      const Icon = tagIcons[tag];
-                      return (
-                        <Badge 
-                          key={tag} 
-                          variant="outline" 
-                          className={`${tagColors[tag]} text-xs transition-all group-hover:scale-105`}
-                        >
-                          <Icon className="h-3 w-3 mr-1" />
-                          {tag}
-                        </Badge>
-                      );
-                    })}
-                  </div>
-
-                  <div className="flex justify-between items-end mt-auto pt-3 border-t">
-                    <div className="flex flex-col">
-                      {discountedPrice !== null ? (
-                        <>
-                          <span className="text-sm text-muted-foreground line-through">
-                            <Price amount={item.price} />
-                          </span>
-                          <Price amount={discountedPrice} className="text-2xl font-bold bg-gradient-to-r from-primary to-orange-500 bg-clip-text text-transparent" />
-                        </>
-                      ) : (
-                        <Price amount={item.price} className="text-2xl font-bold text-primary" />
-                      )}
-                    </div>
-                    <Button 
-                      size="sm" 
-                      className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 group-hover:scale-105 transition-all shadow-md"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleAddToCart(item, 1);
-                      }}
-                    >
-                      Add to Order
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </ScrollReveal>
+            <EnhancedMenuCard
+              key={item.id}
+              item={item}
+              index={index}
+              isFavorite={isFavorite(item.id)}
+              promotion={promotion}
+              discountedPrice={discountedPrice}
+              onItemClick={() => handleItemClick(item)}
+              onQuickAdd={() => handleAddToCart(item, 1)}
+              onToggleFavorite={() => toggleFavorite(item.id)}
+            />
           );
         })}
       </div>
@@ -305,7 +354,47 @@ export default function MenuPage() {
             </p>
           </ScrollReveal>
 
-          <ScrollReveal direction="up" delay={0.1} className="max-w-2xl mx-auto mb-8">
+          {/* Trending Section */}
+          {trendingItems.length > 0 && (
+            <TrendingSection
+              items={trendingItems}
+              onItemClick={handleItemClick}
+              onQuickAdd={(item) => handleAddToCart(item, 1)}
+              getItemPromotion={getItemPromotion}
+              calculateDiscountedPrice={calculateDiscountedPrice}
+            />
+          )}
+
+          {/* Recently Viewed Section */}
+          {favMounted && recentlyViewedItems.length > 0 && (
+            <RecentlyViewedSection
+              items={recentlyViewedItems}
+              onItemClick={handleItemClick}
+              onClear={clearRecentlyViewed}
+            />
+          )}
+
+          {/* Favorites Section */}
+          {favMounted && favoriteItems.length > 0 && (
+            <FavoritesSection
+              items={favoriteItems}
+              onItemClick={handleItemClick}
+              onQuickAdd={(item) => handleAddToCart(item, 1)}
+              onRemoveFavorite={toggleFavorite}
+            />
+          )}
+
+          {/* Recommended Section */}
+          {favMounted && recommendedItems.length > 0 && (
+            <RecommendedSection
+              items={recommendedItems}
+              onItemClick={handleItemClick}
+              onQuickAdd={(item) => handleAddToCart(item, 1)}
+            />
+          )}
+
+          {/* Search Bar */}
+          <ScrollReveal direction="up" delay={0.1} className="max-w-2xl mx-auto mb-6">
             <div className="relative">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
               <Input
@@ -316,6 +405,23 @@ export default function MenuPage() {
                 className="pl-12 h-12 text-base bg-card/50 backdrop-blur-sm border-2 focus:border-primary"
               />
             </div>
+          </ScrollReveal>
+
+          {/* Smart Filter Bar */}
+          <ScrollReveal direction="up" delay={0.15}>
+            <SmartFilterBar
+              priceRange={priceRange}
+              maxPrice={maxPrice}
+              onPriceRangeChange={setPriceRange}
+              selectedDietary={selectedDietary}
+              onDietaryChange={setSelectedDietary}
+              selectedSpiceLevel={selectedSpiceLevel}
+              onSpiceLevelChange={setSelectedSpiceLevel}
+              sortOption={sortOption}
+              onSortChange={setSortOption}
+              onClearFilters={clearAllFilters}
+              activeFilterCount={activeFilterCount}
+            />
           </ScrollReveal>
 
           {/* Category Pills - Mobile Optimized */}

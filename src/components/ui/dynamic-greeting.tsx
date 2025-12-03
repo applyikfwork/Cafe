@@ -5,9 +5,11 @@ import { Coffee, Sun, Moon, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export function DynamicGreeting() {
+  const [mounted, setMounted] = useState(false);
   const [greeting, setGreeting] = useState({ text: 'Welcome', icon: Sun });
 
   useEffect(() => {
+    setMounted(true);
     const hour = new Date().getHours();
     
     if (hour >= 5 && hour < 12) {
@@ -21,18 +23,27 @@ export function DynamicGreeting() {
     }
   }, []);
 
+  // Render a static placeholder during SSR to prevent hydration mismatch
+  if (!mounted) {
+    return (
+      <div className="inline-flex items-center gap-2 px-4 py-2 bg-background/20 text-white border border-white/30 rounded-full backdrop-blur-sm mb-4">
+        <Sun className="h-4 w-4 animate-pulse-soft" />
+        <span className="text-sm font-medium">Welcome!</span>
+      </div>
+    );
+  }
+
   const Icon = greeting.icon;
 
   return (
     <motion.div
-      suppressHydrationWarning
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, delay: 0.2 }}
       className="inline-flex items-center gap-2 px-4 py-2 bg-background/20 text-white border border-white/30 rounded-full backdrop-blur-sm mb-4"
     >
       <Icon className="h-4 w-4 animate-pulse-soft" />
-      <span className="text-sm font-medium" suppressHydrationWarning>{greeting.text}!</span>
+      <span className="text-sm font-medium">{greeting.text}!</span>
     </motion.div>
   );
 }

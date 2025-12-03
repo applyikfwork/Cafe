@@ -13,8 +13,8 @@ import { useSettings } from '@/hooks/useSettings';
 const navLinks = [
   { href: '/', label: 'Home' },
   { href: '/menu', label: 'Menu' },
-  { href: '#', label: 'Book a Table' },
-  { href: '#', label: 'Gallery' },
+  { href: '/reservations', label: 'Book a Table' },
+  { href: '/gallery', label: 'Gallery' },
 ];
 
 export function Header() {
