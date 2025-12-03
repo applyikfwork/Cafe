@@ -2,17 +2,13 @@
 
 export const dynamic = 'force-dynamic';
 
-import { useEffect, useState, useMemo } from 'react';
-import Image from 'next/image';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollReveal } from '@/components/ui/scroll-reveal';
 import { TodaysSpecialBanner } from '@/components/ui/todays-special-banner';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Badge } from '@/components/ui/badge';
 import type { Tag, MenuItem, SortOption, SpiceLevel, DietaryPreference } from '@/types';
 import { useMenuItems } from '@/hooks/useMenuItems';
@@ -21,27 +17,25 @@ import { useCategories } from '@/hooks/use-categories';
 import { useMenuFavorites } from '@/hooks/useMenuFavorites';
 import { initializeMockData } from '@/lib/firestore-service';
 import { useToast } from '@/hooks/use-toast';
-import { Search, Sparkles, TrendingUp, Leaf, Flame, ShieldCheck, Star, ChefHat, ImageIcon } from 'lucide-react';
-import Link from 'next/link';
-import { SwipeableMenuCards } from '@/components/menu/swipeable-menu-cards';
-import { CategoryPills } from '@/components/menu/category-pills';
-import { FullScreenItemPreview } from '@/components/menu/full-screen-item-preview';
+import { Search, Sparkles, Leaf, Flame, ShieldCheck, ChefHat, LayoutGrid, List, Layers } from 'lucide-react';
 import { StickyCartBar } from '@/components/menu/sticky-cart-bar';
 import { SmartFilterBar } from '@/components/menu/smart-filter-bar';
 import { TrendingSection } from '@/components/menu/trending-section';
 import { RecentlyViewedSection } from '@/components/menu/recently-viewed-section';
 import { FavoritesSection } from '@/components/menu/favorites-section';
 import { RecommendedSection } from '@/components/menu/recommended-section';
-import { EnhancedMenuCard } from '@/components/menu/enhanced-menu-card';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { Price } from '@/components/ui/price';
+import { CategoryStoryCarousel } from '@/components/menu/category-story-carousel';
+import { FloatingCategoryNav } from '@/components/menu/floating-category-nav';
+import { AccordionMenuSections } from '@/components/menu/accordion-menu-sections';
+import { ViewModeToggle } from '@/components/menu/view-mode-toggle';
+import { AnimatedMenuCard } from '@/components/menu/animated-menu-card';
+import { MenuItemListCard } from '@/components/menu/menu-item-list-card';
+import { SwipeableItemPreview } from '@/components/menu/swipeable-item-preview';
+import { motion, AnimatePresence } from 'framer-motion';
 
-const tagColors: Record<Tag, string> = {
-  veg: 'border-green-500/80 bg-green-500/10 text-green-700 dark:text-green-400',
-  spicy: 'border-red-500/80 bg-red-500/10 text-red-700 dark:text-red-400',
-  'gluten-free': 'border-blue-500/80 bg-blue-500/10 text-blue-700 dark:text-blue-400',
-  new: 'border-yellow-500/80 bg-yellow-500/10 text-yellow-700 dark:text-yellow-400',
-};
+type ViewMode = 'grid' | 'list';
+type DisplayMode = 'categories' | 'all';
 
 const tagIcons: Record<Tag, any> = {
   veg: Leaf,
@@ -58,18 +52,20 @@ export default function MenuPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
+  const [selectedItemIndex, setSelectedItemIndex] = useState(0);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [cartItems, setCartItems] = useState<Array<{ item: MenuItem; quantity: number }>>([]);
   const isMobile = useIsMobile();
 
-  // Smart filter states
+  const [viewMode, setViewMode] = useState<ViewMode>('grid');
+  const [displayMode, setDisplayMode] = useState<DisplayMode>('categories');
+  const [showFloatingNav, setShowFloatingNav] = useState(false);
+
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]);
   const [selectedDietary, setSelectedDietary] = useState<DietaryPreference[]>([]);
   const [selectedSpiceLevel, setSelectedSpiceLevel] = useState<SpiceLevel | null>(null);
   const [sortOption, setSortOption] = useState<SortOption>('popularity');
 
-  // Favorites and Recently Viewed
   const { 
     favorites, 
     recentlyViewed, 
@@ -84,20 +80,25 @@ export default function MenuPage() {
     initializeMockData();
   }, []);
 
-  // Calculate max price from menu items
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowFloatingNav(window.scrollY > 400);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   const maxPrice = useMemo(() => {
     if (menuItems.length === 0) return 1000;
     return Math.max(...menuItems.map(item => item.price)) + 100;
   }, [menuItems]);
 
-  // Initialize price range when items load
   useEffect(() => {
     if (menuItems.length > 0 && priceRange[1] === 1000) {
       setPriceRange([0, maxPrice]);
     }
   }, [menuItems, maxPrice, priceRange]);
 
-  // Get trending items (top 5 by order count/popularity)
   const trendingItems = useMemo(() => {
     return [...menuItems]
       .sort((a, b) => (b.orderCount || 0) - (a.orderCount || 0))
@@ -105,19 +106,16 @@ export default function MenuPage() {
       .map(item => ({ ...item, isTrending: true }));
   }, [menuItems]);
 
-  // Get favorite items
   const favoriteItems = useMemo(() => {
     return menuItems.filter(item => favorites.includes(item.id));
   }, [menuItems, favorites]);
 
-  // Get recently viewed items
   const recentlyViewedItems = useMemo(() => {
     return recentlyViewed
       .map(id => menuItems.find(item => item.id === id))
       .filter((item): item is MenuItem => item !== undefined);
   }, [menuItems, recentlyViewed]);
 
-  // Get recommended items based on favorites and recently viewed categories
   const recommendedItems = useMemo(() => {
     const viewedCategories = new Set([
       ...favoriteItems.map(i => i.category),
@@ -125,7 +123,6 @@ export default function MenuPage() {
     ]);
     
     if (viewedCategories.size === 0) {
-      // If no history, return random high-rated items
       return [...menuItems]
         .sort((a, b) => (b.rating || 4.5) - (a.rating || 4.5))
         .slice(0, 6);
@@ -141,7 +138,6 @@ export default function MenuPage() {
       .slice(0, 6);
   }, [menuItems, favoriteItems, recentlyViewedItems, favorites, recentlyViewed]);
 
-  // Calculate active filter count
   const activeFilterCount = useMemo(() => {
     let count = 0;
     if (selectedDietary.length > 0) count += selectedDietary.length;
@@ -158,20 +154,16 @@ export default function MenuPage() {
     setSearchQuery('');
   };
 
-  const filterItems = (items: typeof menuItems) => {
+  const filterItems = useCallback((items: MenuItem[]) => {
     return items.filter((item) => {
-      // Search filter
       const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                           item.description.toLowerCase().includes(searchQuery.toLowerCase());
       
-      // Tag filter
       const matchesTags = selectedTags.length === 0 || 
                          selectedTags.some(tag => item.tags.includes(tag));
       
-      // Price filter
       const matchesPrice = item.price >= priceRange[0] && item.price <= priceRange[1];
       
-      // Dietary filter
       const matchesDietary = selectedDietary.length === 0 ||
                             selectedDietary.some(d => 
                               item.dietary?.includes(d) || 
@@ -179,16 +171,17 @@ export default function MenuPage() {
                               (d === 'gluten-free' && item.tags.includes('gluten-free'))
                             );
       
-      // Spice level filter
       const matchesSpice = !selectedSpiceLevel || 
                           item.spiceLevel === selectedSpiceLevel ||
                           (selectedSpiceLevel && item.tags.includes('spicy'));
       
-      return matchesSearch && matchesTags && matchesPrice && matchesDietary && matchesSpice;
+      const matchesCategory = selectedCategory === 'all' || item.category === selectedCategory;
+      
+      return matchesSearch && matchesTags && matchesPrice && matchesDietary && matchesSpice && matchesCategory;
     });
-  };
+  }, [searchQuery, selectedTags, priceRange, selectedDietary, selectedSpiceLevel, selectedCategory]);
 
-  const sortItems = (items: MenuItem[]) => {
+  const sortItems = useCallback((items: MenuItem[]) => {
     const sorted = [...items];
     switch (sortOption) {
       case 'popularity':
@@ -208,7 +201,11 @@ export default function MenuPage() {
       default:
         return sorted;
     }
-  };
+  }, [sortOption]);
+
+  const filteredAndSortedItems = useMemo(() => {
+    return sortItems(filterItems(menuItems));
+  }, [menuItems, filterItems, sortItems]);
 
   const toggleTag = (tag: Tag) => {
     setSelectedTags(prev => 
@@ -216,7 +213,7 @@ export default function MenuPage() {
     );
   };
 
-  const getItemPromotion = (itemId: string) => {
+  const getItemPromotion = useCallback((itemId: string) => {
     const now = new Date();
     const eligiblePromotions = activePromotions.filter(p => {
       if (!p.active || !p.type || typeof p.value !== 'number') return false;
@@ -233,9 +230,9 @@ export default function MenuPage() {
     );
     
     return itemSpecific || eligiblePromotions[0];
-  };
+  }, [activePromotions]);
 
-  const calculateDiscountedPrice = (price: number, promotion: any) => {
+  const calculateDiscountedPrice = useCallback((price: number, promotion: any) => {
     if (!promotion || !promotion.type || typeof promotion.value !== 'number') {
       return null;
     }
@@ -250,9 +247,9 @@ export default function MenuPage() {
       default:
         return null;
     }
-  };
+  }, []);
 
-  const handleAddToCart = (item: MenuItem, quantity: number = 1) => {
+  const handleAddToCart = useCallback((item: MenuItem, quantity: number = 1) => {
     setCartItems((prev) => {
       const existing = prev.find((ci) => ci.item.id === item.id);
       if (existing) {
@@ -266,13 +263,21 @@ export default function MenuPage() {
       title: '✅ Added to Cart!',
       description: `${quantity}x ${item.name} added successfully`,
     });
-  };
+  }, [toast]);
 
-  const handleItemClick = (item: MenuItem) => {
-    setSelectedItem(item);
+  const handleItemClick = useCallback((item: MenuItem) => {
+    const index = filteredAndSortedItems.findIndex(i => i.id === item.id);
+    setSelectedItemIndex(index >= 0 ? index : 0);
     setIsPreviewOpen(true);
     addToRecentlyViewed(item.id);
-  };
+  }, [filteredAndSortedItems, addToRecentlyViewed]);
+
+  const handleNavigatePreview = useCallback((index: number) => {
+    setSelectedItemIndex(index);
+    if (filteredAndSortedItems[index]) {
+      addToRecentlyViewed(filteredAndSortedItems[index].id);
+    }
+  }, [filteredAndSortedItems, addToRecentlyViewed]);
 
   const cartTotal = cartItems.reduce((total, ci) => {
     const promotion = getItemPromotion(ci.item.id);
@@ -280,12 +285,49 @@ export default function MenuPage() {
     return total + (discountedPrice || ci.item.price) * ci.quantity;
   }, 0);
 
-  const renderMenuGrid = (items: typeof menuItems) => {
-    const filteredItems = sortItems(filterItems(items));
+  const renderMenuCard = useCallback((item: MenuItem, index: number) => {
+    const promotion = getItemPromotion(item.id);
+    const discountedPrice = promotion ? calculateDiscountedPrice(item.price, promotion) : null;
     
-    if (filteredItems.length === 0) {
+    if (viewMode === 'list') {
       return (
-        <div className="text-center py-16">
+        <MenuItemListCard
+          key={item.id}
+          item={item}
+          index={index}
+          isFavorite={isFavorite(item.id)}
+          promotion={promotion}
+          discountedPrice={discountedPrice}
+          onItemClick={() => handleItemClick(item)}
+          onQuickAdd={() => handleAddToCart(item, 1)}
+          onToggleFavorite={() => toggleFavorite(item.id)}
+        />
+      );
+    }
+
+    return (
+      <AnimatedMenuCard
+        key={item.id}
+        item={item}
+        index={index}
+        isFavorite={isFavorite(item.id)}
+        promotion={promotion}
+        discountedPrice={discountedPrice}
+        onItemClick={() => handleItemClick(item)}
+        onQuickAdd={() => handleAddToCart(item, 1)}
+        onToggleFavorite={() => toggleFavorite(item.id)}
+      />
+    );
+  }, [viewMode, getItemPromotion, calculateDiscountedPrice, isFavorite, handleItemClick, handleAddToCart, toggleFavorite]);
+
+  const renderMenuContent = () => {
+    if (filteredAndSortedItems.length === 0) {
+      return (
+        <motion.div 
+          className="text-center py-16"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
           <ChefHat className="h-16 w-16 text-muted-foreground/30 mx-auto mb-4" />
           <h3 className="text-xl font-semibold text-muted-foreground mb-2">No items found</h3>
           <p className="text-muted-foreground">Try adjusting your search or filters</p>
@@ -296,45 +338,34 @@ export default function MenuPage() {
           >
             Clear Filters
           </Button>
-        </div>
+        </motion.div>
       );
     }
 
-    // Mobile swipeable view
-    if (isMobile) {
+    if (displayMode === 'categories' && selectedCategory === 'all') {
       return (
-        <div className="space-y-4">
-          <SwipeableMenuCards
-            items={filteredItems}
-            onItemClick={handleItemClick}
-            getItemPromotion={getItemPromotion}
-            calculateDiscountedPrice={calculateDiscountedPrice}
-          />
-        </div>
+        <AccordionMenuSections
+          categories={categories}
+          menuItems={filteredAndSortedItems}
+          renderItem={renderMenuCard}
+          viewMode={viewMode}
+          defaultExpanded={categories.slice(0, 2).map(c => c.id)}
+        />
       );
     }
 
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredItems.map((item, index) => {
-          const promotion = getItemPromotion(item.id);
-          const discountedPrice = promotion ? calculateDiscountedPrice(item.price, promotion) : null;
-          
-          return (
-            <EnhancedMenuCard
-              key={item.id}
-              item={item}
-              index={index}
-              isFavorite={isFavorite(item.id)}
-              promotion={promotion}
-              discountedPrice={discountedPrice}
-              onItemClick={() => handleItemClick(item)}
-              onQuickAdd={() => handleAddToCart(item, 1)}
-              onToggleFavorite={() => toggleFavorite(item.id)}
-            />
-          );
-        })}
-      </div>
+      <motion.div 
+        className={viewMode === 'grid' 
+          ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6' 
+          : 'space-y-3'
+        }
+        layout
+      >
+        <AnimatePresence mode="popLayout">
+          {filteredAndSortedItems.map((item, index) => renderMenuCard(item, index))}
+        </AnimatePresence>
+      </motion.div>
     );
   };
 
@@ -343,18 +374,26 @@ export default function MenuPage() {
       <Header />
       <TodaysSpecialBanner />
       
-      <main className="flex-1">
-        <div className="container mx-auto px-4 py-12">
-          <ScrollReveal direction="up" className="text-center mb-8">
-            <h1 className="text-5xl md:text-6xl font-headline font-bold bg-gradient-to-r from-primary via-orange-500 to-amber-500 bg-clip-text text-transparent mb-4">
-              Our Delicious Menu
+      <main className="flex-1 pb-24">
+        <div className="container mx-auto px-4 py-8 md:py-12">
+          <ScrollReveal direction="up" className="text-center mb-6 md:mb-8">
+            <h1 className="text-4xl md:text-6xl font-headline font-bold bg-gradient-to-r from-primary via-orange-500 to-amber-500 bg-clip-text text-transparent mb-3">
+              Our Menu
             </h1>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Discover handcrafted dishes made with love and the finest ingredients
+            <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto">
+              Discover handcrafted dishes made with love
             </p>
           </ScrollReveal>
 
-          {/* Trending Section */}
+          {!loading && !categoriesLoading && (
+            <CategoryStoryCarousel
+              categories={categories}
+              menuItems={menuItems}
+              selectedCategory={selectedCategory}
+              onCategoryChange={setSelectedCategory}
+            />
+          )}
+
           {trendingItems.length > 0 && (
             <TrendingSection
               items={trendingItems}
@@ -365,7 +404,6 @@ export default function MenuPage() {
             />
           )}
 
-          {/* Recently Viewed Section */}
           {favMounted && recentlyViewedItems.length > 0 && (
             <RecentlyViewedSection
               items={recentlyViewedItems}
@@ -374,7 +412,6 @@ export default function MenuPage() {
             />
           )}
 
-          {/* Favorites Section */}
           {favMounted && favoriteItems.length > 0 && (
             <FavoritesSection
               items={favoriteItems}
@@ -384,7 +421,6 @@ export default function MenuPage() {
             />
           )}
 
-          {/* Recommended Section */}
           {favMounted && recommendedItems.length > 0 && (
             <RecommendedSection
               items={recommendedItems}
@@ -393,22 +429,20 @@ export default function MenuPage() {
             />
           )}
 
-          {/* Search Bar */}
-          <ScrollReveal direction="up" delay={0.1} className="max-w-2xl mx-auto mb-6">
-            <div className="relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-              <Input
-                type="text"
-                placeholder="Search menu items..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-12 h-12 text-base bg-card/50 backdrop-blur-sm border-2 focus:border-primary"
-              />
+          <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-md py-4 -mx-4 px-4 mb-6 border-b border-border/50">
+            <div className="max-w-2xl mx-auto mb-4">
+              <div className="relative">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input
+                  type="text"
+                  placeholder="Search menu items..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-12 h-12 text-base bg-card/50 border-2 focus:border-primary rounded-xl"
+                />
+              </div>
             </div>
-          </ScrollReveal>
 
-          {/* Smart Filter Bar */}
-          <ScrollReveal direction="up" delay={0.15}>
             <SmartFilterBar
               priceRange={priceRange}
               maxPrice={maxPrice}
@@ -422,47 +456,43 @@ export default function MenuPage() {
               onClearFilters={clearAllFilters}
               activeFilterCount={activeFilterCount}
             />
-          </ScrollReveal>
 
-          {/* Category Pills - Mobile Optimized */}
-          <ScrollReveal direction="up" delay={0.1} className="mb-8">
-            <CategoryPills
-              categories={categories}
-              selectedCategory={selectedCategory}
-              onCategoryChange={(categoryId) => {
-                setSelectedCategory(categoryId);
-              }}
-            />
-          </ScrollReveal>
+            <div className="flex items-center justify-between mt-4 gap-4">
+              <div className="flex items-center gap-2 flex-wrap">
+                {(['veg', 'spicy', 'gluten-free', 'new'] as Tag[]).map((tag) => {
+                  const Icon = tagIcons[tag];
+                  const isSelected = selectedTags.includes(tag);
+                  return (
+                    <Button
+                      key={tag}
+                      variant={isSelected ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => toggleTag(tag)}
+                      className={`h-8 text-xs ${isSelected ? 'ring-2 ring-primary ring-offset-1' : ''}`}
+                    >
+                      <Icon className="h-3 w-3 mr-1" />
+                      {tag.charAt(0).toUpperCase() + tag.slice(1).replace('-', ' ')}
+                    </Button>
+                  );
+                })}
+              </div>
 
-          <ScrollReveal direction="up" delay={0.2} className="flex flex-wrap justify-center gap-3 mb-10">
-            {(['veg', 'spicy', 'gluten-free', 'new'] as Tag[]).map((tag) => {
-              const Icon = tagIcons[tag];
-              const isSelected = selectedTags.includes(tag);
-              return (
+              <div className="flex items-center gap-2">
                 <Button
-                  key={tag}
-                  variant={isSelected ? "default" : "outline"}
+                  variant={displayMode === 'categories' ? 'default' : 'outline'}
                   size="sm"
-                  onClick={() => toggleTag(tag)}
-                  className={`transition-all ${isSelected ? 'ring-2 ring-primary ring-offset-2' : ''}`}
+                  onClick={() => setDisplayMode(displayMode === 'categories' ? 'all' : 'categories')}
+                  className="h-8"
                 >
-                  <Icon className="h-4 w-4 mr-2" />
-                  {tag.charAt(0).toUpperCase() + tag.slice(1)}
+                  <Layers className="h-4 w-4 mr-1" />
+                  <span className="hidden sm:inline">
+                    {displayMode === 'categories' ? 'Sections' : 'All'}
+                  </span>
                 </Button>
-              );
-            })}
-            {selectedTags.length > 0 && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setSelectedTags([])}
-                className="text-muted-foreground"
-              >
-                Clear All
-              </Button>
-            )}
-          </ScrollReveal>
+                <ViewModeToggle viewMode={viewMode} onViewModeChange={setViewMode} />
+              </div>
+            </div>
+          </div>
 
           {loading || categoriesLoading ? (
             <div className="flex justify-center items-center h-96">
@@ -475,52 +505,31 @@ export default function MenuPage() {
               </div>
             </div>
           ) : (
-            <Tabs defaultValue="all" className="w-full">
-              <div className="flex justify-center mb-8 hidden md:block">
-                <TabsList className="bg-card/50 backdrop-blur-sm p-1.5 shadow-lg border">
-                  <TabsTrigger 
-                    value="all" 
-                    className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary/80 data-[state=active]:text-white px-6"
-                  >
-                    All Items
-                  </TabsTrigger>
-                  {categories.map((category) => (
-                    <TabsTrigger 
-                      key={category.id} 
-                      value={category.id}
-                      className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary/80 data-[state=active]:text-white px-6"
-                    >
-                      {category.name}
-                    </TabsTrigger>
-                  ))}
-                </TabsList>
-              </div>
-
-              <TabsContent value="all" className="mt-0">
-                {renderMenuGrid(menuItems)}
-              </TabsContent>
-
-              {categories.map((category) => (
-                <TabsContent key={category.id} value={category.id} className="mt-0">
-                  {renderMenuGrid(menuItems.filter(item => item.category === category.id))}
-                </TabsContent>
-              ))}
-            </Tabs>
+            renderMenuContent()
           )}
         </div>
       </main>
 
-      {/* Full Screen Item Preview Modal */}
-      <FullScreenItemPreview
-        item={selectedItem}
+      <SwipeableItemPreview
+        items={filteredAndSortedItems}
+        currentIndex={selectedItemIndex}
         isOpen={isPreviewOpen}
         onClose={() => setIsPreviewOpen(false)}
         onAddToCart={handleAddToCart}
-        promotion={selectedItem ? getItemPromotion(selectedItem.id) : null}
+        onNavigate={handleNavigatePreview}
+        getItemPromotion={getItemPromotion}
         calculateDiscountedPrice={calculateDiscountedPrice}
       />
 
-      {/* Sticky Cart Bar - Mobile Only */}
+      {isMobile && showFloatingNav && (
+        <FloatingCategoryNav
+          categories={categories}
+          menuItems={menuItems}
+          selectedCategory={selectedCategory}
+          onCategoryChange={setSelectedCategory}
+        />
+      )}
+
       <StickyCartBar
         cartCount={cartItems.reduce((sum, ci) => sum + ci.quantity, 0)}
         cartTotal={cartTotal}

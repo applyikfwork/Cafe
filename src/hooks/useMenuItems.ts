@@ -1,25 +1,29 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { subscribeToMenuItems, subscribeToMenuItemsByCategory } from '@/lib/firestore-service';
+import { subscribeToMenuItems, subscribeToMenuItemsByCategory, MOCK_MENU_ITEMS } from '@/lib/firestore-service';
 import type { MenuItem } from '@/types';
 
 export function useMenuItems() {
-  const [items, setItems] = useState<MenuItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [items, setItems] = useState<MenuItem[]>(MOCK_MENU_ITEMS);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    setLoading(true);
+    let isMounted = true;
+    
     try {
       const unsubscribe = subscribeToMenuItems((data) => {
-        setItems(data);
-        setLoading(false);
+        if (isMounted) {
+          setItems(data.length > 0 ? data : MOCK_MENU_ITEMS);
+        }
       });
-      return () => unsubscribe();
+      return () => {
+        isMounted = false;
+        unsubscribe();
+      };
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch menu items');
-      setLoading(false);
     }
   }, []);
 

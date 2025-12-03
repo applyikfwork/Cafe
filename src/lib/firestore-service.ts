@@ -15,7 +15,7 @@ import {
 import type { MenuItem } from '@/types';
 
 // Mock data for initialization
-const MOCK_MENU_ITEMS: MenuItem[] = [
+export const MOCK_MENU_ITEMS: MenuItem[] = [
   {
     id: 'item-1',
     name: 'Classic Avocado Toast',

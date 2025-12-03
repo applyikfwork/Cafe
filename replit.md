@@ -90,14 +90,61 @@ Cafe Central Station is a modern Next.js 15 application designed for cafes, feat
   - Gallery videos with thumbnails and duration
   - Contest submissions with voting
 
-#### Menu Page - Powerful Features
+#### Menu Page - Powerful Mobile-First Features (Latest)
+- **Instagram-Style Category Story Carousel** (`category-story-carousel.tsx`) - Swipeable horizontal cards with:
+  - Beautiful gradient overlays on category images
+  - Category names and icons (Coffee, Sunrise, Cake, etc.)
+  - Dot pagination indicators
+  - Embla Carousel for smooth swiping
+  - "Tap to explore" CTA on All Items card
+  
+- **Floating Category Navigation** (`floating-category-nav.tsx`) - Bubble navigation that:
+  - Appears on scroll (after 400px)
+  - Shows category pills with icons
+  - Smooth scroll-to-section on tap
+  - Frosted glass effect backdrop
+  
+- **View Mode Toggle** (`view-mode-toggle.tsx`) - Switch between:
+  - Sections view (accordion-style category sections)
+  - Grid view (2-3 column responsive grid)
+  - List view (compact horizontal cards)
+  
+- **Accordion Menu Sections** (`accordion-menu-sections.tsx`) - Collapsible sections with:
+  - Category headers with item counts
+  - Smooth expand/collapse animations
+  - Framer Motion staggered children
+  
+- **Animated Menu Cards** (`animated-menu-card.tsx`) - Enhanced grid cards with:
+  - Entrance animations (slide up with fade)
+  - Staggered delay based on index
+  - Size variant pills (S/M/L) for quick selection
+  - Heart icon for favorites
+  - Star ratings display
+  - Gradient price badges
+  
+- **Menu Item List Cards** (`menu-item-list-card.tsx`) - Compact horizontal layout with:
+  - Square thumbnail on left
+  - Price and quick-add on right
+  - Tags as small badges
+  
+- **Swipeable Item Preview** (`swipeable-item-preview.tsx`) - Full-screen modal with:
+  - Swipe left/right for prev/next items
+  - Size selector pills
+  - Add to cart with quantity
+  - Framer Motion gestures
+  
 - **Smart Filter Bar** - Price range slider, dietary preferences (veg/vegan/gluten-free/dairy-free/nut-free), spice level selector
 - **Sorting Options** - Sort by popularity, rating, price (low-high/high-low), newest
-- **Enhanced Menu Cards** - Star ratings, review counts, prep time, quick add-to-cart button, favorite/wishlist heart icon
-- **Trending Now Section** - Horizontal scrollable section showing most ordered items with ranking badges
+- **Trending Now Section** - Horizontal scrollable section showing most ordered items with ranking badges (#1, #2, etc.)
 - **Recently Viewed** - Persistent section showing items user has viewed (localStorage)
 - **Favorites/Wishlist** - Save items with heart icon, persisted in localStorage
 - **Recommended For You** - AI-style recommendations based on viewing history and preferences
+
+**Data Loading Optimization**:
+- Hooks start with mock data immediately (no loading spinner delay)
+- Firebase subscriptions update data in background
+- MOCK_MENU_ITEMS exported from firestore-service.ts for fallback
+- Hydration-safe rendering with proper client detection
 
 #### Gallery Page (New)
 - **Masonry/Grid Layout Toggle** - Switch between Pinterest-style masonry and uniform grid
@@ -170,6 +217,13 @@ The application is built with Next.js 15 and TypeScript, utilizing Turbopack for
 ### Component Library
 
 **Menu Components** (`src/components/menu/`):
+- `category-story-carousel.tsx` - Instagram-style swipeable category cards
+- `floating-category-nav.tsx` - Floating bubble navigation on scroll
+- `accordion-menu-sections.tsx` - Collapsible category sections
+- `view-mode-toggle.tsx` - Grid/List/Sections view switcher
+- `animated-menu-card.tsx` - Grid cards with entrance animations & size pills
+- `menu-item-list-card.tsx` - Compact horizontal list cards
+- `swipeable-item-preview.tsx` - Full-screen modal with swipe gestures
 - `smart-filter-bar.tsx` - Price range slider, dietary filters, sort dropdown
 - `trending-section.tsx` - Horizontal scrollable trending items
 - `recently-viewed-section.tsx` - Recently viewed items with clear button
