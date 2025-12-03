@@ -7,21 +7,14 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import { Play, Video, ChevronLeft, ChevronRight, X } from 'lucide-react';
-
-interface VideoItem {
-  id: string;
-  title: string;
-  thumbnail: string;
-  videoUrl: string;
-  duration: string;
-}
+import type { GalleryVideo } from '@/types';
 
 interface VideoSectionProps {
-  videos: VideoItem[];
+  videos: GalleryVideo[];
 }
 
 export function VideoSection({ videos }: VideoSectionProps) {
-  const [selectedVideo, setSelectedVideo] = useState<VideoItem | null>(null);
+  const [selectedVideo, setSelectedVideo] = useState<GalleryVideo | null>(null);
 
   if (videos.length === 0) return null;
 
@@ -61,9 +54,11 @@ export function VideoSection({ videos }: VideoSectionProps) {
                     <Play className="h-8 w-8 text-primary ml-1" fill="currentColor" />
                   </div>
                 </div>
-                <Badge className="absolute bottom-3 right-3 bg-black/70 text-white border-0">
-                  {video.duration}
-                </Badge>
+                {video.duration && (
+                  <Badge className="absolute bottom-3 right-3 bg-black/70 text-white border-0">
+                    {video.duration}
+                  </Badge>
+                )}
               </div>
               <div className="p-4">
                 <h3 className="font-semibold group-hover:text-primary transition-colors">

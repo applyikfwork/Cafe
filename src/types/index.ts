@@ -9,6 +9,19 @@ export type DietaryPreference = typeof dietaryPreferences[number];
 
 export type SortOption = 'popularity' | 'rating' | 'price-low' | 'price-high' | 'newest';
 
+export interface Review {
+  id: string;
+  menuItemId: string;
+  reviewerName: string;
+  reviewerAvatar?: string;
+  rating: number;
+  comment: string;
+  date: Date;
+  isVerified?: boolean;
+  helpful?: number;
+  images?: string[];
+}
+
 export interface MenuItem {
   id: string;
   name: string;
@@ -25,11 +38,15 @@ export interface MenuItem {
   prepTime?: number;
   calories?: number;
   orderCount?: number;
+  totalBuyers?: number;
   spiceLevel?: SpiceLevel;
   dietary?: DietaryPreference[];
   isPopular?: boolean;
   isTrending?: boolean;
+  isBestSeller?: boolean;
+  reviews?: Review[];
   createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export interface Category {
@@ -78,19 +95,45 @@ export interface Promotion {
   updatedAt: Date;
 }
 
+export type GalleryCategory = 'ambiance' | 'food' | 'events' | 'behind-the-scenes';
+
 export interface GalleryItem {
   id: string;
   title: string;
   description?: string;
   imageUrl: string;
-  category: 'ambiance' | 'food' | 'events' | 'behind-the-scenes';
+  thumbnailUrl?: string;
+  category: GalleryCategory;
   menuItemId?: string;
   likes: number;
+  views?: number;
   isPhotoOfDay?: boolean;
   isContest?: boolean;
+  isFeatured?: boolean;
   videoUrl?: string;
   submittedBy?: string;
+  submitterEmail?: string;
+  tags?: string[];
+  order?: number;
+  active?: boolean;
   createdAt: Date;
+  updatedAt?: Date;
+}
+
+export interface GalleryVideo {
+  id: string;
+  title: string;
+  description?: string;
+  thumbnail: string;
+  videoUrl: string;
+  duration?: string;
+  category?: GalleryCategory;
+  views?: number;
+  likes?: number;
+  isFeatured?: boolean;
+  active?: boolean;
+  createdAt: Date;
+  updatedAt?: Date;
 }
 
 export interface PhotoContest {
@@ -100,5 +143,16 @@ export interface PhotoContest {
   startDate: Date;
   endDate: Date;
   active: boolean;
+  prize?: string;
+  rules?: string[];
   submissions: GalleryItem[];
+}
+
+export interface GalleryStats {
+  totalPhotos: number;
+  totalVideos: number;
+  totalLikes: number;
+  totalViews: number;
+  contestSubmissions: number;
+  photosByCategory: Record<GalleryCategory, number>;
 }

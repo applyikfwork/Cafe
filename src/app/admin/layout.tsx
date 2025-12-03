@@ -16,7 +16,8 @@ import {
   Users,
   LogOut,
   Database,
-  FolderOpen
+  FolderOpen,
+  Image
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -32,6 +33,7 @@ const adminNavItems = [
   { href: '/admin', label: 'Dashboard', icon: Home },
   { href: '/admin/menu', label: 'Menu', icon: Book },
   { href: '/admin/categories', label: 'Categories', icon: FolderOpen },
+  { href: '/admin/gallery', label: 'Gallery', icon: Image },
   { href: '/admin/bookings', label: 'Bookings', icon: Calendar },
   { href: '/admin/orders', label: 'Orders', icon: Receipt },
   { href: '/admin/promotions', label: 'Promotions', icon: Tag },

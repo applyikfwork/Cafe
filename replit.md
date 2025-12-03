@@ -14,6 +14,36 @@ Cafe Central Station is a modern Next.js 15 application designed for cafes, feat
 
 ### Recent Improvements (Latest Session)
 
+#### Social Proof System (New)
+- **Fake Data Generator** (`src/lib/fake-data-generator.ts`) - Generates realistic reviews with:
+  - Random reviewer names from diverse pool
+  - Ratings between 3.5-5 stars (realistic positive bias)
+  - Review comments tailored to menu item names
+  - Random dates within past 90 days
+  - Verified buyer badges
+  - Helpful vote counts
+- **Admin Menu Form** - One-click "Generate Social Proof" button adds:
+  - Rating (3.5-5 stars)
+  - Review count
+  - Prep time and calories
+  - Total buyer count (50-500)
+  - 3-5 fake reviews with realistic comments
+- **Full-Screen Item Preview** - Enhanced to show:
+  - Social proof stats grid (rating, prep time, calories, buyers)
+  - Best Seller/Trending/Popular badges
+  - Customer reviews section with avatars, ratings, dates, helpful counts
+  - Verified buyer badges on reviews
+
+#### Admin Gallery Management (New)
+- **Gallery Admin Page** (`src/app/admin/gallery/page.tsx`) - Full management interface with tabs:
+  - Photos tab with add/edit/delete functionality
+  - Videos tab for managing video content
+  - Contest tab for managing photo contests
+- **Firebase Gallery Service** (`src/lib/firestore-gallery-service.ts`) - Complete CRUD operations for:
+  - Gallery photos with categories and tags
+  - Gallery videos with thumbnails and duration
+  - Contest submissions with voting
+
 #### Menu Page - Powerful Features
 - **Smart Filter Bar** - Price range slider, dietary preferences (veg/vegan/gluten-free/dairy-free/nut-free), spice level selector
 - **Sorting Options** - Sort by popularity, rating, price (low-high/high-low), newest
@@ -35,6 +65,7 @@ Cafe Central Station is a modern Next.js 15 application designed for cafes, feat
 #### Bug Fixes
 - **Hydration Error Fixed** - Resolved server/client rendering mismatch in DynamicGreeting and mobile detection
 - **Deterministic Values** - Replaced Math.random() with hash-based values for consistent server/client rendering
+- **VideoSection Type Fix** - Updated to use GalleryVideo type with optional duration field
 
 ### System Architecture
 The application is built with Next.js 15 and TypeScript, utilizing Turbopack for fast development. Styling is managed with Tailwind CSS and Radix UI components, enhanced with Framer Motion for animations. The core architecture includes:

@@ -6,11 +6,12 @@ import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import type { MenuItem, Tag } from '@/types';
+import type { MenuItem, Tag, Review } from '@/types';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
-import { X, Minus, Plus, Check, TrendingUp, Star, Flame, Leaf, ShieldCheck } from 'lucide-react';
+import { X, Minus, Plus, Check, TrendingUp, Star, Flame, Leaf, ShieldCheck, Clock, Users, Award, ThumbsUp } from 'lucide-react';
 import { Price } from '@/components/ui/price';
 import { DiscountBadge, Currency } from '@/components/ui/currency';
+import { format } from 'date-fns';
 
 interface FullScreenItemPreviewProps {
   item: MenuItem | null;
@@ -146,6 +147,142 @@ export function FullScreenItemPreview({
               <p className="text-lg text-muted-foreground mb-6 leading-relaxed">
                 {item.description}
               </p>
+
+              {/* Social Proof Stats */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                {item.rating && (
+                  <div className="flex items-center gap-2 p-3 bg-yellow-500/10 rounded-lg border border-yellow-500/20">
+                    <Star className="h-5 w-5 text-yellow-500 fill-yellow-500" />
+                    <div>
+                      <p className="font-bold text-lg">{item.rating.toFixed(1)}</p>
+                      <p className="text-xs text-muted-foreground">{item.reviewCount || 0} reviews</p>
+                    </div>
+                  </div>
+                )}
+                {item.prepTime && (
+                  <div className="flex items-center gap-2 p-3 bg-blue-500/10 rounded-lg border border-blue-500/20">
+                    <Clock className="h-5 w-5 text-blue-500" />
+                    <div>
+                      <p className="font-bold text-lg">{item.prepTime} min</p>
+                      <p className="text-xs text-muted-foreground">Prep time</p>
+                    </div>
+                  </div>
+                )}
+                {item.calories && (
+                  <div className="flex items-center gap-2 p-3 bg-orange-500/10 rounded-lg border border-orange-500/20">
+                    <Flame className="h-5 w-5 text-orange-500" />
+                    <div>
+                      <p className="font-bold text-lg">{item.calories}</p>
+                      <p className="text-xs text-muted-foreground">Calories</p>
+                    </div>
+                  </div>
+                )}
+                {item.totalBuyers && (
+                  <div className="flex items-center gap-2 p-3 bg-green-500/10 rounded-lg border border-green-500/20">
+                    <Users className="h-5 w-5 text-green-500" />
+                    <div>
+                      <p className="font-bold text-lg">{item.totalBuyers.toLocaleString()}</p>
+                      <p className="text-xs text-muted-foreground">Happy buyers</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Badges for special items */}
+              {(item.isPopular || item.isTrending || item.isBestSeller) && (
+                <div className="flex flex-wrap gap-2 mb-6">
+                  {item.isBestSeller && (
+                    <Badge className="bg-gradient-to-r from-yellow-500 to-amber-500 text-white border-0">
+                      <Award className="h-3 w-3 mr-1" />
+                      Best Seller
+                    </Badge>
+                  )}
+                  {item.isTrending && (
+                    <Badge className="bg-gradient-to-r from-orange-500 to-red-500 text-white border-0">
+                      <TrendingUp className="h-3 w-3 mr-1" />
+                      Trending
+                    </Badge>
+                  )}
+                  {item.isPopular && (
+                    <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white border-0">
+                      <Star className="h-3 w-3 mr-1" />
+                      Popular Choice
+                    </Badge>
+                  )}
+                </div>
+              )}
+
+              {/* Customer Reviews */}
+              {item.reviews && item.reviews.length > 0 && (
+                <div className="mb-6">
+                  <h3 className="font-headline font-semibold text-lg mb-3 flex items-center gap-2">
+                    <Star className="h-5 w-5 text-yellow-500" />
+                    Customer Reviews
+                  </h3>
+                  <div className="space-y-3 max-h-64 overflow-y-auto">
+                    {item.reviews.slice(0, 3).map((review: Review) => (
+                      <div key={review.id} className="p-4 bg-muted/50 rounded-lg border">
+                        <div className="flex items-center gap-3 mb-2">
+                          {review.reviewerAvatar ? (
+                            <img
+                              src={review.reviewerAvatar}
+                              alt={review.reviewerName}
+                              className="w-10 h-10 rounded-full"
+                            />
+                          ) : (
+                            <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+                              <span className="font-bold text-primary">
+                                {review.reviewerName.charAt(0)}
+                              </span>
+                            </div>
+                          )}
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <span className="font-semibold">{review.reviewerName}</span>
+                              {review.isVerified && (
+                                <Badge variant="outline" className="text-xs text-green-600 border-green-300">
+                                  <Check className="h-3 w-3 mr-1" />
+                                  Verified
+                                </Badge>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-1">
+                              {Array.from({ length: 5 }).map((_, i) => {
+                                const fullStars = Math.floor(review.rating);
+                                const hasHalfStar = review.rating % 1 >= 0.5;
+                                const isFull = i < fullStars;
+                                const isHalf = i === fullStars && hasHalfStar;
+                                return (
+                                  <Star
+                                    key={i}
+                                    className={`h-3 w-3 ${
+                                      isFull
+                                        ? 'text-yellow-500 fill-yellow-500'
+                                        : isHalf
+                                        ? 'text-yellow-500 fill-yellow-500/50'
+                                        : 'text-gray-300'
+                                    }`}
+                                  />
+                                );
+                              })}
+                              <span className="text-xs text-muted-foreground ml-2">
+                                {review.date ? format(new Date(review.date), 'MMM d, yyyy') : ''}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <p className="text-sm text-muted-foreground">{review.comment}</p>
+                        {review.helpful && review.helpful > 0 && (
+                          <div className="flex items-center gap-1 mt-2 text-xs text-muted-foreground">
+                            <ThumbsUp className="h-3 w-3" />
+                            {review.helpful} found this helpful
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Ingredients */}
               {item.ingredients && item.ingredients.length > 0 && (
