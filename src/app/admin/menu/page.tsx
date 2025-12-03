@@ -21,7 +21,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { formatCurrency } from '@/lib/utils';
+import { Price } from '@/components/ui/price';
 import { MenuFormSheet } from './components/menu-form-sheet';
 import { useMenuItems } from '@/hooks/useMenuItems';
 import { useCategories } from '@/hooks/use-categories';
@@ -100,7 +100,7 @@ export default function AdminMenuPage() {
                     </TableCell>
                     <TableCell className="font-medium">{item.name}</TableCell>
                     <TableCell>{category?.name || 'Uncategorized'}</TableCell>
-                    <TableCell>{formatCurrency(item.price)}</TableCell>
+                    <TableCell><Price amount={item.price} /></TableCell>
                     <TableCell>
                       <div className="flex gap-1 flex-wrap">
                         {item.tags.map(tag => <Badge key={tag} variant="outline" className="text-xs">{tag}</Badge>)}

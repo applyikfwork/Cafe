@@ -22,8 +22,8 @@ import { useActivePromotions } from '@/hooks/usePromotions';
 import { useSettings } from '@/hooks/useSettings';
 import { useTodaysSpecial } from '@/hooks/useTodaysSpecial';
 import { initializeMockData } from '@/lib/firestore-service';
-import { formatCurrency } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Currency, DiscountBadge, Rupee } from '@/components/ui/currency';
 import { format } from 'date-fns';
 import { FeaturedCarousel } from '@/components/home/featured-carousel';
 import { TestimonialsSection } from '@/components/home/testimonials-section';
@@ -164,8 +164,7 @@ export default function Home() {
                       <div className="inline-block bg-white/95 rounded-2xl px-6 sm:px-8 py-4 shadow-2xl">
                         <div className="text-center">
                           <div className="text-5xl sm:text-6xl font-black text-orange-600">
-                            {topPromotion.type === 'percentage' ? `${topPromotion.value}%` : 
-                             topPromotion.type === 'fixed' ? <><span className="currency-symbol">₹</span>{topPromotion.value}</> : 'BOGO'}
+                            <DiscountBadge type={topPromotion.type} value={topPromotion.value} />
                           </div>
                           <p className="text-xs sm:text-sm font-bold text-gray-600 mt-1">OFF</p>
                         </div>
@@ -203,8 +202,7 @@ export default function Home() {
                       <div className="space-y-4">
                         <div className="text-sm uppercase tracking-widest font-bold text-white/80">Your Savings</div>
                         <div className="text-5xl sm:text-6xl font-black">
-                          {topPromotion.type === 'percentage' ? `${topPromotion.value}%` : 
-                           topPromotion.type === 'fixed' ? <><span className="currency-symbol">₹</span>{topPromotion.value}</> : 'BOGO'}
+                          <DiscountBadge type={topPromotion.type} value={topPromotion.value} />
                         </div>
                         <div className="h-1 bg-gradient-to-r from-transparent via-white to-transparent rounded-full" />
                         <p className="text-lg text-white/90 font-semibold">{topPromotion.title}</p>
@@ -291,7 +289,7 @@ export default function Home() {
                               </p>
                               <div className="flex justify-between items-center mt-6 pt-4 border-t">
                                 <p className="text-3xl font-bold bg-gradient-to-r from-primary to-orange-500 bg-clip-text text-transparent">
-                                  <span className="currency-symbol">₹</span>{new Intl.NumberFormat('en-IN').format(item.price)}
+                                  <Currency amount={item.price} />
                                 </p>
                                 <Button 
                                   variant="outline" 

@@ -112,41 +112,87 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
-/* Price styling - uses Noto Sans Devanagari for proper rupee symbol rendering on ALL devices */
-.price-display {
-  font-family: 'Noto Sans Devanagari', 'Noto Sans', sans-serif !important;
-  font-weight: 700 !important;
-  font-size: inherit !important;
-  line-height: 1 !important;
+/* ============================================
+   CENTRALIZED INDIAN RUPEE CURRENCY SYSTEM
+   Uses Noto Sans Devanagari for proper ₹ rendering
+   ============================================ */
+
+/* Currency wrapper - applies to any element containing currency */
+.currency-wrapper,
+.price-display,
+.prize-amount,
+.price-range,
+.discount-badge {
+  font-family: 'Noto Sans Devanagari', 'Noto Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
   display: inline !important;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.01em;
 }
 
-/* Currency symbol styling for better Rupee rendering */
-.currency-symbol,
-.rupee-symbol {
-  font-family: 'Noto Sans Devanagari', 'Noto Sans', sans-serif !important;
-  font-weight: 700 !important;
+/* Rupee symbol - the core styling for ₹ */
+.rupee-symbol,
+.currency-symbol {
+  font-family: 'Noto Sans Devanagari', 'Noto Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  font-weight: inherit !important;
   display: inline !important;
   font-size: 1em !important;
   line-height: 1 !important;
-  margin-right: 2px;
+  margin-right: 1px;
+  unicode-bidi: isolate;
 }
 
-/* Override default styling to ensure rupee symbols show everywhere */
+/* Currency value - the number after the symbol */
+.currency-value {
+  font-family: 'Noto Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  display: inline !important;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Price display - bold styling for prices */
+.price-display {
+  font-weight: 700 !important;
+}
+
+.price-display .rupee-symbol {
+  font-weight: 700 !important;
+}
+
+/* Ensure proper font rendering across all browsers and devices */
 @supports (font-family: 'Noto Sans Devanagari') {
+  .currency-wrapper,
   .price-display,
+  .rupee-symbol,
   .currency-symbol,
-  .rupee-symbol {
+  .currency-value {
     font-variant-numeric: tabular-nums;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
   }
 }
 
-/* Mobile optimization for rupee display */
+/* Mobile optimization for currency display */
 @media (max-width: 768px) {
+  .currency-wrapper,
   .price-display,
-  .currency-symbol,
-  .rupee-symbol {
+  .rupee-symbol,
+  .currency-symbol {
     font-feature-settings: 'kern' 1;
+  }
+}
+
+/* Fallback for devices that don't support Noto Sans Devanagari */
+@supports not (font-family: 'Noto Sans Devanagari') {
+  .rupee-symbol,
+  .currency-symbol {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Arial Unicode MS', sans-serif !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .rupee-symbol,
+  .currency-symbol,
+  .price-display {
+    font-weight: 800 !important;
   }
 }

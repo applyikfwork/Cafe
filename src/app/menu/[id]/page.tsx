@@ -9,9 +9,9 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { ScrollReveal } from '@/components/ui/scroll-reveal';
-import { formatCurrency } from '@/lib/utils';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Price } from '@/components/ui/price';
+import { DiscountBadge } from '@/components/ui/currency';
 import { useMenuItems } from '@/hooks/useMenuItems';
 import { useActivePromotions } from '@/hooks/usePromotions';
 import { useToast } from '@/hooks/use-toast';
@@ -146,7 +146,7 @@ function MenuItemContent() {
                   </div>
                   {promotion && promotion.type && (
                     <Badge className="bg-gradient-to-r from-red-500 to-orange-500 text-white border-0 text-base px-4 py-2">
-                      {promotion.type === 'percentage' ? `${promotion.value}% OFF` : `₹${promotion.value} OFF`}
+                      <DiscountBadge type={promotion.type} value={promotion.value} suffix="OFF" />
                     </Badge>
                   )}
                 </div>

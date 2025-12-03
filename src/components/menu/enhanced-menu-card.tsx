@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Price } from '@/components/ui/price';
+import { DiscountBadge } from '@/components/ui/currency';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { ScrollReveal } from '@/components/ui/scroll-reveal';
 import { 
@@ -115,8 +116,7 @@ export function EnhancedMenuCard({
         {promotion && promotion.type && promotion.value !== undefined && (
           <div className="absolute top-14 right-3 z-10">
             <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0 shadow-lg animate-pulse">
-              {promotion.type === 'percentage' ? `${promotion.value}% OFF` : 
-               promotion.type === 'fixed' ? `₹${promotion.value} OFF` : 'SPECIAL'}
+              <DiscountBadge type={promotion.type} value={promotion.value} suffix="OFF" />
             </Badge>
           </div>
         )}

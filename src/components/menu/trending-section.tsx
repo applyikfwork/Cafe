@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Price } from '@/components/ui/price';
+import { DiscountBadge } from '@/components/ui/currency';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { TrendingUp, Star, Clock, ChevronLeft, ChevronRight, Flame, ImageIcon } from 'lucide-react';
 import type { MenuItem } from '@/types';
@@ -111,7 +112,7 @@ export function TrendingSection({
                   {promotion && (
                     <div className="absolute top-3 right-3">
                       <Badge className="bg-green-500 text-white border-0 animate-pulse">
-                        {promotion.type === 'percentage' ? `${promotion.value}% OFF` : `₹${promotion.value} OFF`}
+                        <DiscountBadge type={promotion.type} value={promotion.value} suffix="OFF" />
                       </Badge>
                     </div>
                   )}

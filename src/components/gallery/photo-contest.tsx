@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/dialog';
 import { Trophy, Heart, Camera, Upload, User, Clock, ChevronRight } from 'lucide-react';
 import type { GalleryItem } from '@/types';
+import { PrizeAmount } from '@/components/ui/currency';
 
 interface PhotoContestProps {
   photos: GalleryItem[];
@@ -220,21 +221,21 @@ export function PhotoContest({ photos, isLiked, onLike, onPhotoClick }: PhotoCon
           <div className="flex items-center gap-3 p-4 bg-white dark:bg-background rounded-lg">
             <Badge className="bg-yellow-500 text-white border-0 text-lg">1st</Badge>
             <div>
-              <p className="font-semibold">₹5,000 Gift Card</p>
+              <p className="font-semibold"><PrizeAmount amount={5000} /> Gift Card</p>
               <p className="text-sm text-muted-foreground">+ Featured on Instagram</p>
             </div>
           </div>
           <div className="flex items-center gap-3 p-4 bg-white dark:bg-background rounded-lg">
             <Badge className="bg-gray-400 text-white border-0 text-lg">2nd</Badge>
             <div>
-              <p className="font-semibold">₹2,500 Gift Card</p>
+              <p className="font-semibold"><PrizeAmount amount={2500} /> Gift Card</p>
               <p className="text-sm text-muted-foreground">+ Free meal for 2</p>
             </div>
           </div>
           <div className="flex items-center gap-3 p-4 bg-white dark:bg-background rounded-lg">
             <Badge className="bg-amber-600 text-white border-0 text-lg">3rd</Badge>
             <div>
-              <p className="font-semibold">₹1,000 Gift Card</p>
+              <p className="font-semibold"><PrizeAmount amount={1000} /> Gift Card</p>
               <p className="text-sm text-muted-foreground">+ Cafe merchandise</p>
             </div>
           </div>

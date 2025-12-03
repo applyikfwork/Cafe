@@ -9,6 +9,7 @@ import type { MenuItem, Tag } from '@/types';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { TrendingUp, Star, Flame, Leaf, ShieldCheck } from 'lucide-react';
 import { Price } from '@/components/ui/price';
+import { DiscountBadge } from '@/components/ui/currency';
 
 interface SwipeableMenuCardsProps {
   items: MenuItem[];
@@ -109,7 +110,7 @@ export function SwipeableMenuCards({
                       <div className="absolute top-2 right-2 z-10">
                         <Badge className="bg-red-500 text-white text-xs border-0 shadow-lg animate-pulse">
                           <TrendingUp className="h-2.5 w-2.5 mr-0.5" />
-                          {promotion.type === 'percentage' ? `${promotion.value}%` : `₹${promotion.value}`}
+                          <DiscountBadge type={promotion.type} value={promotion.value} />
                         </Badge>
                       </div>
                     )}

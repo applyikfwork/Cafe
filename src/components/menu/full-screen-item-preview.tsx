@@ -9,8 +9,8 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import type { MenuItem, Tag } from '@/types';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { X, Minus, Plus, Check, TrendingUp, Star, Flame, Leaf, ShieldCheck } from 'lucide-react';
-import { RupeeSymbol } from '@/components/ui/rupee-symbol';
 import { Price } from '@/components/ui/price';
+import { DiscountBadge, Currency } from '@/components/ui/currency';
 
 interface FullScreenItemPreviewProps {
   item: MenuItem | null;
@@ -99,7 +99,7 @@ export function FullScreenItemPreview({
                 {promotion && promotion.type && promotion.value !== undefined && (
                   <Badge className="bg-red-500 text-white border-0 shadow-lg">
                     <TrendingUp className="h-3 w-3 mr-1" />
-                    {promotion.type === 'percentage' ? `${promotion.value}% OFF` : `₹${promotion.value} OFF`}
+                    <DiscountBadge type={promotion.type} value={promotion.value} suffix="OFF" />
                   </Badge>
                 )}
                 {item.tags.includes('new' as Tag) && (
@@ -217,7 +217,7 @@ export function FullScreenItemPreview({
                     Added to Order!
                   </>
                 ) : (
-                  `Add to Order (₹${discountedPrice ? Math.round(discountedPrice * quantity) : item.price * quantity})`
+                  <>Add to Order (<Currency amount={discountedPrice ? Math.round(discountedPrice * quantity) : item.price * quantity} />)</>
                 )}
               </Button>
 

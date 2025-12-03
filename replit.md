@@ -116,6 +116,30 @@ The application is built with Next.js 15 and TypeScript, utilizing Turbopack for
 - `useGallery` - Gallery items, likes, photo of day, category filters
 - `useIsMobile` - Responsive mobile detection (hydration-safe)
 
+### Currency System (Centralized Indian Rupee Display)
+The application uses a robust centralized currency system for consistent ₹ symbol display across all devices:
+
+**Currency Library** (`src/lib/currency.ts`):
+- `formatIndianNumber()` - Formats numbers with Indian locale (e.g., 1,00,000)
+- `formatPrice()` - Returns object with symbol, value, and full formatted price
+- `formatDiscount()` - Handles percentage, fixed, and BOGO discount types
+
+**Currency Components** (`src/components/ui/currency.tsx`):
+- `<Currency amount={500} />` - Full price display with ₹ symbol
+- `<Rupee />` - Standalone ₹ symbol
+- `<DiscountBadge type="fixed" value={100} suffix="OFF" />` - Discount badges
+- `<PrizeAmount amount={5000} />` - Prize/gift card amounts
+- `<PriceRange min={100} max={500} />` - Price range display
+- `<Price amount={299} />` - Legacy component, now uses centralized system
+
+**CSS Classes** (in `globals.css`):
+- `.currency-wrapper` - Base wrapper for currency elements
+- `.rupee-symbol` - ₹ symbol with Noto Sans Devanagari font
+- `.currency-value` - Numeric value with tabular nums
+- `.price-display` - Bold price styling
+
+**Font Stack**: Noto Sans Devanagari → Noto Sans → System fonts (for cross-device compatibility)
+
 ### External Dependencies
 - **Firebase**: Firestore for real-time database, Firebase Admin for server-side operations
 - **Cloudinary**: Cloud image upload and hosting for menu items and hero images

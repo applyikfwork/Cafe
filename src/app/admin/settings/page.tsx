@@ -18,6 +18,7 @@ import { updateTodaysSpecial } from '@/lib/firestore-todays-special-service';
 import { useToast } from '@/hooks/use-toast';
 import { Upload, Coffee, Image as ImageIcon } from 'lucide-react';
 import { Price } from '@/components/ui/price';
+import { Rupee, Currency } from '@/components/ui/currency';
 
 const settingsSchema = z.object({
   name: z.string().min(2),
@@ -338,7 +339,7 @@ export default function AdminSettingsPage() {
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium mb-2 block">Price (₹)</label>
+                  <label className="text-sm font-medium mb-2 block">Price (<Rupee />)</label>
                   <Input
                     id="special-price"
                     type="number"
@@ -390,7 +391,7 @@ export default function AdminSettingsPage() {
                 <p className="font-bold text-sm">{special.title}</p>
                 <p className="text-xs text-white/80 mt-1">{special.description}</p>
                 <p className="text-lg font-bold mt-2">
-                  <span className="currency-symbol">₹</span>{special.price}
+                  <Currency amount={special.price} />
                 </p>
               </div>
             </CardContent>
