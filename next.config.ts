@@ -1,7 +1,6 @@
 import type {NextConfig} from 'next';
 
 const nextConfig: NextConfig = {
-  /* config options here */
   typescript: {
     ignoreBuildErrors: true,
   },
@@ -34,14 +33,15 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+        port: '',
+        pathname: '/**',
+      },
     ],
   },
-  experimental: {
-    // Kept for any future experimental flags
-  },
-  allowedDevOrigins: [
-    'https://6ac952c2-99e2-4322-b5f2-eba8d99413d1-00-25s4ldpet5fa1.pike.replit.dev',
-  ],
+  allowedDevOrigins: ['*'],
 };
 
 export default nextConfig;
