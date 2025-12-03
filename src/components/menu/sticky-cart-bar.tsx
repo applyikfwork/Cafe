@@ -4,7 +4,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { ShoppingCart } from 'lucide-react';
 import Link from 'next/link';
-import { RupeeSymbol } from '@/components/ui/rupee-symbol';
+import { Currency } from '@/components/ui/currency';
 
 interface StickyCartBarProps {
   cartCount: number;
@@ -29,7 +29,7 @@ export function StickyCartBar({
               {cartCount} {cartCount === 1 ? 'Item' : 'Items'}
             </span>
             <span className="text-xs text-muted-foreground">
-              Total: <RupeeSymbol />{Math.round(cartTotal)}
+              Total: <Currency amount={cartTotal} />
             </span>
           </div>
         </div>

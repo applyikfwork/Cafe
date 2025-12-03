@@ -120,17 +120,23 @@ The application is built with Next.js 15 and TypeScript, utilizing Turbopack for
 The application uses a robust centralized currency system for consistent ₹ symbol display across all devices:
 
 **Currency Library** (`src/lib/currency.ts`):
-- `formatIndianNumber()` - Formats numbers with Indian locale (e.g., 1,00,000)
-- `formatPrice()` - Returns object with symbol, value, and full formatted price
-- `formatDiscount()` - Handles percentage, fixed, and BOGO discount types
+- `RUPEE_SYMBOL` / `RUPEE_UNICODE` - Exported constants for ₹ symbol
+- `formatIndianNumber(amount, preserveDecimals=true)` - Formats numbers with Indian locale (e.g., 1,00,000), preserves decimals by default
+- `formatPrice(amount, preserveDecimals=true)` - Returns object with symbol, value, and full formatted price
+- `formatPriceRange(min, max, preserveDecimals=true)` - Range formatting
+- `formatDiscount(type, value, preserveDecimals=true)` - Handles percentage, fixed, and BOGO discount types
 
 **Currency Components** (`src/components/ui/currency.tsx`):
-- `<Currency amount={500} />` - Full price display with ₹ symbol
+- `<Currency amount={500} preserveDecimals />` - Full price display with ₹ symbol
 - `<Rupee />` - Standalone ₹ symbol
 - `<DiscountBadge type="fixed" value={100} suffix="OFF" />` - Discount badges
 - `<PrizeAmount amount={5000} />` - Prize/gift card amounts
 - `<PriceRange min={100} max={500} />` - Price range display
-- `<Price amount={299} />` - Legacy component, now uses centralized system
+- `<Price amount={299} />` - Simple price component using centralized system
+
+**Decimal Precision**:
+- `preserveDecimals=true` (default): Shows decimals when present (e.g., ₹99.50)
+- `preserveDecimals=false`: Rounds to whole numbers (e.g., ₹100)
 
 **CSS Classes** (in `globals.css`):
 - `.currency-wrapper` - Base wrapper for currency elements
