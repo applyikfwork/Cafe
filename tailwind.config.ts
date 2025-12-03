@@ -20,6 +20,10 @@ export default {
         body: ['PT Sans', 'sans-serif'],
         headline: ['Playfair Display', 'serif'],
         code: ['Source Code Pro', 'monospace'],
+        script: ['Pacifico', 'cursive'],
+        elegant: ['Cormorant Garamond', 'serif'],
+        handwritten: ['Dancing Script', 'cursive'],
+        menu: ['Lora', 'serif'],
       },
       colors: {
         border: 'hsl(var(--border))',

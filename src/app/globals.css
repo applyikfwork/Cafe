@@ -10,6 +10,23 @@ h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-headline), serif;
 }
 
+/* Cafe-themed font utilities */
+.font-script {
+  font-family: 'Pacifico', cursive;
+}
+
+.font-elegant {
+  font-family: 'Cormorant Garamond', serif;
+}
+
+.font-handwritten {
+  font-family: 'Dancing Script', cursive;
+}
+
+.font-menu {
+  font-family: 'Lora', serif;
+}
+
 @layer base {
   :root {
     /* Warm Cafe Palette - Light Mode */
