@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Accordion,
@@ -66,10 +66,22 @@ export function AccordionMenuSections({
 
   const getItemsForCategory = useCallback(
     (categoryId: string) => {
-      return menuItems.filter((item) => item.category === categoryId);
+      return menuItems.filter((item) => 
+        item.category === categoryId || 
+        item.category?.toLowerCase() === categoryId?.toLowerCase() ||
+        item.category?.toLowerCase().replace(/\s+/g, '-') === categoryId?.toLowerCase()
+      );
     },
     [menuItems]
   );
+
+  const uncategorizedItems = useMemo(() => {
+    const categorizedItemIds = new Set<string>();
+    categories.forEach(cat => {
+      getItemsForCategory(cat.id).forEach(item => categorizedItemIds.add(item.id));
+    });
+    return menuItems.filter(item => !categorizedItemIds.has(item.id));
+  }, [menuItems, categories, getItemsForCategory]);
 
   const getCategoryStats = useCallback(
     (categoryId: string) => {
@@ -201,6 +213,87 @@ export function AccordionMenuSections({
           </AccordionItem>
         );
       })}
+
+      {/* Show uncategorized items if any exist */}
+      {uncategorizedItems.length > 0 && (
+        <AccordionItem
+          value="uncategorized"
+          className="rounded-2xl border-2 border-primary/30 bg-primary/5 overflow-hidden transition-all duration-300"
+        >
+          <AccordionTrigger className="px-4 md:px-5 lg:px-6 py-4 md:py-5 hover:no-underline group">
+            <div className="flex items-center justify-between w-full">
+              <div className="flex items-center gap-3">
+                <motion.span
+                  className="text-3xl"
+                  animate={{ rotate: expandedSections.includes('uncategorized') ? 10 : 0 }}
+                  transition={{ type: 'spring', stiffness: 300 }}
+                >
+                  ✨
+                </motion.span>
+                <div className="text-left">
+                  <h3 className="text-lg font-bold text-primary">
+                    All Menu Items
+                  </h3>
+                  <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                    <span className="flex items-center gap-1">
+                      <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                      Featured
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <motion.div
+                  className="bg-white dark:bg-gray-800 px-3 py-1.5 rounded-full shadow-sm border border-border"
+                  initial={{ scale: 0.9 }}
+                  animate={{ scale: 1 }}
+                  whileHover={{ scale: 1.05 }}
+                >
+                  <span className="font-semibold text-sm">
+                    {uncategorizedItems.length} item{uncategorizedItems.length !== 1 ? 's' : ''}
+                  </span>
+                </motion.div>
+                <motion.div
+                  animate={{ rotate: expandedSections.includes('uncategorized') ? 180 : 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="p-1.5 rounded-full bg-white/50 dark:bg-gray-800/50"
+                >
+                  <ChevronDown className="w-5 h-5" />
+                </motion.div>
+              </div>
+            </div>
+          </AccordionTrigger>
+
+          <AccordionContent className="px-4 md:px-5 lg:px-6 pb-4 md:pb-5">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.3 }}
+              className={
+                viewMode === 'grid'
+                  ? 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-5 lg:gap-6'
+                  : 'space-y-3 md:space-y-4'
+              }
+            >
+              <AnimatePresence mode="popLayout">
+                {uncategorizedItems.map((item, index) => (
+                  <motion.div
+                    key={item.id}
+                    layout
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    transition={{ delay: index * 0.05 }}
+                  >
+                    {renderItem(item, index)}
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </motion.div>
+          </AccordionContent>
+        </AccordionItem>
+      )}
     </Accordion>
   );
 }

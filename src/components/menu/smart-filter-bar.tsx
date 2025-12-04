@@ -91,10 +91,23 @@ export function SmartFilterBar({
   };
 
   return (
-    <div className="flex flex-wrap items-center gap-3 mb-6">
+    <div className="flex flex-wrap items-center gap-3 mb-4">
+      {/* Clear All Button - Always visible when filters active */}
+      {activeFilterCount > 0 && (
+        <Button
+          variant="destructive"
+          size="sm"
+          onClick={onClearFilters}
+          className="h-9 px-3 gap-1"
+        >
+          <X className="h-4 w-4" />
+          Clear All
+        </Button>
+      )}
+
       {/* Sort Dropdown */}
       <Select value={sortOption} onValueChange={(value) => onSortChange(value as SortOption)}>
-        <SelectTrigger className="w-[180px] bg-card/50 backdrop-blur-sm border-2">
+        <SelectTrigger className="w-[160px] md:w-[180px] bg-card/50 backdrop-blur-sm border-2 h-9">
           <ArrowUpDown className="h-4 w-4 mr-2" />
           <SelectValue placeholder="Sort by" />
         </SelectTrigger>
@@ -110,9 +123,10 @@ export function SmartFilterBar({
       {/* Filter Sheet Trigger */}
       <Sheet open={isOpen} onOpenChange={setIsOpen}>
         <SheetTrigger asChild>
-          <Button variant="outline" className="relative bg-card/50 backdrop-blur-sm border-2">
+          <Button variant="outline" className="relative bg-card/50 backdrop-blur-sm border-2 h-9">
             <SlidersHorizontal className="h-4 w-4 mr-2" />
-            Filters
+            <span className="hidden sm:inline">More Filters</span>
+            <span className="sm:hidden">Filters</span>
             {activeFilterCount > 0 && (
               <Badge className="absolute -top-2 -right-2 h-5 w-5 p-0 flex items-center justify-center bg-primary text-white text-xs">
                 {activeFilterCount}
@@ -218,14 +232,36 @@ export function SmartFilterBar({
         </SheetContent>
       </Sheet>
 
+      {/* Quick Dietary Filters - Visible on larger screens */}
+      <div className="hidden md:flex items-center gap-2">
+        <Button
+          variant={selectedDietary.includes('veg') ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => toggleDietary('veg')}
+          className="h-9 gap-1"
+        >
+          <Leaf className="h-4 w-4" />
+          Veg
+        </Button>
+        <Button
+          variant={selectedSpiceLevel === 'hot' ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => onSpiceLevelChange(selectedSpiceLevel === 'hot' ? null : 'hot')}
+          className="h-9 gap-1"
+        >
+          <Flame className="h-4 w-4" />
+          Spicy
+        </Button>
+      </div>
+
       {/* Active Filters Display */}
       {activeFilterCount > 0 && (
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 w-full mt-2 md:mt-0 md:w-auto">
           {selectedDietary.map((dietary) => (
             <Badge 
               key={dietary} 
               variant="secondary" 
-              className="flex items-center gap-1 cursor-pointer hover:bg-destructive/20"
+              className="flex items-center gap-1 cursor-pointer hover:bg-destructive/20 transition-colors"
               onClick={() => toggleDietary(dietary)}
             >
               {dietary}
@@ -235,7 +271,7 @@ export function SmartFilterBar({
           {selectedSpiceLevel && (
             <Badge 
               variant="secondary" 
-              className="flex items-center gap-1 cursor-pointer hover:bg-destructive/20"
+              className="flex items-center gap-1 cursor-pointer hover:bg-destructive/20 transition-colors"
               onClick={() => onSpiceLevelChange(null)}
             >
               {selectedSpiceLevel}
@@ -245,7 +281,7 @@ export function SmartFilterBar({
           {(priceRange[0] > 0 || priceRange[1] < maxPrice) && (
             <Badge 
               variant="secondary" 
-              className="flex items-center gap-1 cursor-pointer hover:bg-destructive/20"
+              className="flex items-center gap-1 cursor-pointer hover:bg-destructive/20 transition-colors"
               onClick={() => onPriceRangeChange([0, maxPrice])}
             >
               <Price amount={priceRange[0]} /> - <Price amount={priceRange[1]} />

@@ -58,7 +58,7 @@ export default function MenuPage() {
   const isMobile = useIsMobile();
 
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
-  const [displayMode, setDisplayMode] = useState<DisplayMode>('categories');
+  const [displayMode, setDisplayMode] = useState<DisplayMode>('all');
   const [showFloatingNav, setShowFloatingNav] = useState(false);
 
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]);
@@ -459,6 +459,9 @@ export default function MenuPage() {
 
             <div className="flex items-center justify-between mt-4 gap-4">
               <div className="flex items-center gap-2 flex-wrap">
+                <Badge variant="secondary" className="h-8 px-3 text-sm font-medium bg-primary/10 text-primary border-primary/20">
+                  {filteredAndSortedItems.length} {filteredAndSortedItems.length === 1 ? 'item' : 'items'}
+                </Badge>
                 {(['veg', 'spicy', 'gluten-free', 'new'] as Tag[]).map((tag) => {
                   const Icon = tagIcons[tag];
                   const isSelected = selectedTags.includes(tag);
@@ -486,7 +489,7 @@ export default function MenuPage() {
                 >
                   <Layers className="h-4 w-4 mr-1" />
                   <span className="hidden sm:inline">
-                    {displayMode === 'categories' ? 'Sections' : 'All'}
+                    {displayMode === 'categories' ? 'By Category' : 'All Items'}
                   </span>
                 </Button>
                 <ViewModeToggle viewMode={viewMode} onViewModeChange={setViewMode} />
