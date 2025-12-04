@@ -116,7 +116,7 @@ export function AccordionMenuSections({
             value={category.id}
             className={`rounded-2xl border-2 ${colors.border} ${colors.bg} overflow-hidden transition-all duration-300`}
           >
-            <AccordionTrigger className="px-4 py-4 hover:no-underline group">
+            <AccordionTrigger className="px-4 md:px-5 lg:px-6 py-4 md:py-5 hover:no-underline group">
               <div className="flex items-center justify-between w-full">
                 <div className="flex items-center gap-3">
                   <motion.span
@@ -171,15 +171,15 @@ export function AccordionMenuSections({
               </div>
             </AccordionTrigger>
 
-            <AccordionContent className="px-4 pb-4">
+            <AccordionContent className="px-4 md:px-5 lg:px-6 pb-4 md:pb-5">
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.3 }}
                 className={
                   viewMode === 'grid'
-                    ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4'
-                    : 'space-y-3'
+                    ? 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-5 lg:gap-6'
+                    : 'space-y-3 md:space-y-4'
                 }
               >
                 <AnimatePresence mode="popLayout">

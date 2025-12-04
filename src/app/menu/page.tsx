@@ -357,8 +357,8 @@ export default function MenuPage() {
     return (
       <motion.div 
         className={viewMode === 'grid' 
-          ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6' 
-          : 'space-y-3'
+          ? 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-5 lg:gap-6' 
+          : 'space-y-3 md:space-y-4'
         }
         layout
       >
@@ -521,7 +521,7 @@ export default function MenuPage() {
         calculateDiscountedPrice={calculateDiscountedPrice}
       />
 
-      {isMobile && showFloatingNav && (
+      {showFloatingNav && (
         <FloatingCategoryNav
           categories={categories}
           menuItems={menuItems}
@@ -533,6 +533,7 @@ export default function MenuPage() {
       <StickyCartBar
         cartCount={cartItems.reduce((sum, ci) => sum + ci.quantity, 0)}
         cartTotal={cartTotal}
+        cartItems={cartItems}
       />
       
       <Footer />

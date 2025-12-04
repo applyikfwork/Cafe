@@ -81,7 +81,7 @@ export function FloatingCategoryNav({
 
   return (
     <motion.div
-      className="fixed bottom-24 left-1/2 -translate-x-1/2 z-40 floating-nav-container"
+      className="fixed bottom-24 md:bottom-20 left-1/2 -translate-x-1/2 z-40 floating-nav-container"
       initial={{ y: 100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ type: 'spring', damping: 20, stiffness: 300 }}
@@ -89,7 +89,7 @@ export function FloatingCategoryNav({
       <AnimatePresence>
         {isExpanded && (
           <motion.div
-            className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-64 bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-border overflow-hidden"
+            className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-64 md:w-72 bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-border overflow-hidden"
             initial={{ opacity: 0, scale: 0.8, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.8, y: 20 }}
